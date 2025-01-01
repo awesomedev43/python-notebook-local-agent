@@ -3,8 +3,8 @@ import { Component } from "solid-js";
 const Header: Component<{}> = () => {
   
   return (
-    <header class="w-full bg-gray-200 pt-2 pb-2 border-b-[1px] border-gray-300">
-        <h1 class="text-3xl">Python Notebook Runner</h1>
+    <header class="w-full bg-gray-200 pt-2 pb-2 border-b-[1px] border-gray-300 font-bold">
+        <h1 class="text-3xl text-gray-700 tracking-tighter">Python Notebook Runner</h1>
     </header>
   );
 };

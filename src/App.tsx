@@ -1,5 +1,6 @@
 import "./App.css";
 import Header from "./Header.tsx"
+import Navbar from "./Navbar.tsx";
 
 function App() {
 
@@ -12,8 +13,10 @@ function App() {
         </div>
         <div class="grow">
           <div class="flex flex-row">
-            <div class="flex-none w-1/6 h-screen bg-gray-300 border-r-[1px] border-gray-300"></div>
-            <div class="grow p-1">Main Content</div>
+            <div class="flex-none w-24 h-screen bg-gray-200 border-r-[1px] border-gray-300 border-solid">
+              <Navbar />
+            </div>
+            <div class="grow p-2 bg-white">Main Content</div>
 
           </div>
         </div>
