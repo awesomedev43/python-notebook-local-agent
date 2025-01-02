@@ -51,7 +51,7 @@ const Settings: Component<{}> = () => {
     return (
         <>
             <div class="w-full max-w-xl">
-                <form class="bg-white shadow-md rounded px-8 pt-6 pb-4 mb-2">
+                <form class="bg-white rounded pb-4 mb-2">
 
                     <h1 class="text-xl mb-4 font-bold">Notebook Run Configuration</h1>
                     <div class="mb-1">
