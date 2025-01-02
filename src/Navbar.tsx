@@ -1,5 +1,5 @@
 import { Component, For } from "solid-js";
-import { IconProgressCheck, IconBriefcase, IconSettings, IconPlayerPlay} from '@tabler/icons-solidjs';
+import { IconProgressCheck, IconBriefcase, IconSettings, IconPlayerPlay } from '@tabler/icons-solidjs';
 import { A } from "@solidjs/router";
 
 type ButtonProps = {
@@ -39,7 +39,7 @@ const Navbar: Component<{}> = () => {
             <For each={navButtons}>
                 {(item, _) =>
 
-                    <A href={item.href} class="flex flex-col text-center border-solid border-b-[0.5px] border-gray-300 hover:bg-blue-600 pt-1 pb-1 group [&.active]:bg-blue-600">
+                    <A href={item.href} class="group flex flex-col border-b-[0.5px] border-solid border-gray-300 pb-1 pt-1 text-center hover:bg-blue-600 [&.active]:bg-blue-600">
 
                         <div class="place-self-center">
                             <item.icon size={30} class="group-hover:stroke-white group-[&.active]:stroke-white" />
