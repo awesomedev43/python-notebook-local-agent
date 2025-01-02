@@ -1,19 +1,19 @@
 import { Component, createResource, Show } from "solid-js";
 import { Navigate } from "@solidjs/router";
-import { checkStoreValue } from "./Store";
+import { isStoreValueSet } from "./Store";
 import Settings from "./Settings";
 
 const Landing: Component<{}> = () => {
 
-    const [isStoreValueSet] = createResource(async () => {
-        const isSet = await checkStoreValue('executable-path')
-            && checkStoreValue('report-directory');
+    const [isConfigured] = createResource(async () => {
+        const isSet: boolean = (await isStoreValueSet('executable-path'))
+            && (await isStoreValueSet('data-directory'));
         return isSet;
     });
 
     return (
         <>
-            <Show when={isStoreValueSet() ?? false}>
+            <Show when={isConfigured() ?? false}>
                 <Navigate href="/run" />
             </Show>
 
