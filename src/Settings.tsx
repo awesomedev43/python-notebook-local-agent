@@ -1,6 +1,6 @@
-import { Component, createSignal } from "solid-js";
+import { Component, createResource, createSignal, onMount } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
-import { KVStore } from "./Store";
+import { KVStore, KVStoreKeys } from "./Store";
 import { IconInfoCircle } from "@tabler/icons-solidjs";
 
 const SaveToast: Component<{ visible: boolean }> = (props) => {
@@ -12,12 +12,19 @@ const SaveToast: Component<{ visible: boolean }> = (props) => {
     );
 };
 
-
 const Settings: Component<{}> = () => {
 
     const [executablePath, setExecutablePath] = createSignal<string>("");
     const [dataDirectory, setDataDirectory] = createSignal<string>("");
     const [showToast, setShowToast] = createSignal<boolean>(false);
+    const [init] = createResource(async () => {
+        setExecutablePath(await KVStore.getStoreValue(KVStoreKeys.EXECUTABLE_PATH));
+        setDataDirectory(await KVStore.getStoreValue(KVStoreKeys.DATA_DIRECTORY));
+    });
+
+    onMount(() => {
+        init();
+    });
 
     const openExecutableDialog = async (event: any) => {
         event.preventDefault();
@@ -40,8 +47,8 @@ const Settings: Component<{}> = () => {
 
     const onSave = async (e: any) => {
         e.stopPropagation();
-        KVStore.setStoreValue('executable-path', executablePath());
-        KVStore.setStoreValue('data-directory', dataDirectory());
+        await KVStore.setStoreValue(KVStoreKeys.EXECUTABLE_PATH, executablePath());
+        await KVStore.setStoreValue(KVStoreKeys.DATA_DIRECTORY, dataDirectory());
         setShowToast(true);
         setTimeout(() => {
             setShowToast(false);
@@ -70,7 +77,7 @@ const Settings: Component<{}> = () => {
                             Data Directory
                         </label>
                         <div class="flex flex-row gap-2">
-                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="report-directory" type="text" value={dataDirectory()} />
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="data-directory" type="text" value={dataDirectory()} />
                             <button class="bg-blue-500 hover:bg-blue-700 text-white py-0 h-9 px-3 rounded focus:outline-none focus:shadow-outline" type="button" onClick={openDataDirectoryDialog}>
                                 Browse
                             </button>

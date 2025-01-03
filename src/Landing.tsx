@@ -1,13 +1,13 @@
 import { Component, createResource, Show } from "solid-js";
 import { Navigate } from "@solidjs/router";
-import { KVStore } from "./Store";
+import { KVStore, KVStoreKeys } from "./Store";
 import Settings from "./Settings";
 
 const Landing: Component<{}> = () => {
 
     const [isConfigured] = createResource(async () => {
-        const isSet: boolean = (await KVStore.isStoreValueSet('executable-path'))
-            && (await KVStore.isStoreValueSet('data-directory'));
+        const isSet: boolean = (await KVStore.isStoreValueSet(KVStoreKeys.EXECUTABLE_PATH))
+            && (await KVStore.isStoreValueSet(KVStoreKeys.DATA_DIRECTORY));
         return isSet;
     });
 
