@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import { load } from '@tauri-apps/plugin-store';
 
 export enum KVStoreKeys {
@@ -22,5 +23,16 @@ export class KVStore {
         const store = await load('store.json', { autoSave: false });
         await store.set(key, value);
         await store.save();
+    }
+
+    static async configureBackend() {
+        await invoke('configure_app',
+            {
+                "config": {
+                    "executable_path": await KVStore.getStoreValue(KVStoreKeys.EXECUTABLE_PATH),
+                    "data_directory": await KVStore.getStoreValue(KVStoreKeys.DATA_DIRECTORY),
+                }
+            }
+        );
     }
 };
