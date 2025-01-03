@@ -1,6 +1,9 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
-use std::sync::Mutex;
+use std::{
+    process::{Command, Stdio},
+    sync::Mutex,
+};
 
 use serde::{Deserialize, Serialize};
 use tauri::{App, AppHandle, Manager, State};
@@ -31,8 +34,33 @@ struct RunArguments {
 }
 
 #[tauri::command]
-fn run_notebook(_app: AppHandle, run_args: RunArguments) -> String {
+fn run_notebook(
+    _app: AppHandle,
+    state: State<'_, Mutex<AppState>>,
+    run_args: RunArguments,
+) -> String {
     println!("run_notebook {:?}", run_args);
+
+    let (executable_path, data_directory) = {
+        let state = state.lock().unwrap();
+        (state.executable_path.clone(), state.data_directory.clone())
+    };
+
+    tauri::async_runtime::spawn(async move {
+        let child = Command::new(executable_path)
+            .args(["--version"])
+            .current_dir(data_directory)
+            .stdin(Stdio::piped())
+            .stderr(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Failed to spawn executable");
+
+        let output = child.wait_with_output().expect("Failed to get output");
+        let raw_output = String::from_utf8(output.stdout).unwrap();
+        println!("Raw output: {:?}", raw_output);
+    });
+
     return format!("run_notebook {:?}", run_args);
 }
 
