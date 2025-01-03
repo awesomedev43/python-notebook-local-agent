@@ -2,7 +2,6 @@ import { Component, createResource, Show } from "solid-js";
 import { Navigate } from "@solidjs/router";
 import { KVStore, KVStoreKeys } from "./Store";
 import Settings from "./Settings";
-import { invoke } from "@tauri-apps/api/core";
 
 const Landing: Component<{}> = () => {
 

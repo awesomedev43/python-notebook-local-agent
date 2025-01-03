@@ -2,7 +2,6 @@ import { Component, createResource, createSignal, onMount } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { KVStore, KVStoreKeys } from "./Store";
 import { IconInfoCircle } from "@tabler/icons-solidjs";
-import { invoke } from "@tauri-apps/api/core";
 
 const SaveToast: Component<{ visible: boolean }> = (props) => {
     return (
