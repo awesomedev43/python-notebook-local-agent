@@ -10,6 +10,10 @@ const Run: Component<{}> = () => {
         const file = await open({
             multiple: false,
             directory: false,
+            filters: [{
+                extensions: ['ipynb'],
+                name: "ipynb"
+            }]
         }) ?? '';
 
         setNbPath(file);

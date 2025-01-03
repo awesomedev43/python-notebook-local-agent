@@ -1,12 +1,11 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
-use std::{
-    process::{Command, Stdio},
-    sync::Mutex,
-};
+use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 use tauri::{App, AppHandle, Manager, State};
+
+mod runner;
 
 #[derive(Default, Debug)]
 struct AppState {
@@ -45,23 +44,9 @@ fn run_notebook(
         let state = state.lock().unwrap();
         (state.executable_path.clone(), state.data_directory.clone())
     };
-
-    tauri::async_runtime::spawn(async move {
-        let child = Command::new(executable_path)
-            .args(["--version"])
-            .current_dir(data_directory)
-            .stdin(Stdio::piped())
-            .stderr(Stdio::piped())
-            .stdout(Stdio::piped())
-            .spawn()
-            .expect("Failed to spawn executable");
-
-        let output = child.wait_with_output().expect("Failed to get output");
-        let raw_output = String::from_utf8(output.stdout).unwrap();
-        println!("Raw output: {:?}", raw_output);
-    });
-
-    return format!("run_notebook {:?}", run_args);
+    
+    let uuid = runner::execute_notebook(executable_path, data_directory, run_args.nb_path);
+    return format!("Started process with uuid = {:?}", uuid);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
