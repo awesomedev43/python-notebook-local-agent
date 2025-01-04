@@ -1,5 +1,5 @@
 import { IconInfoCircle, IconAlertCircle } from "@tabler/icons-solidjs";
-import { Component } from "solid-js";
+import { Component, createSignal, JSX } from "solid-js";
 
 export enum ToastType {
     Note = 0,
@@ -38,5 +38,18 @@ const Toast: Component<{ message: string, visible: boolean, toastType: ToastType
     );
 };
 
+export function createToastComponent(toastType: ToastType): [((note: string) => void), JSX.Element] {
+    const [toastNote, setToastNote] = createSignal<string | null>(null);
+    const setAndClearNote = (note: string) => {
+        setToastNote(`${note}`);
+        setTimeout(() => {
+            setToastNote(null);
+        }, 3000);
+    }
 
-export default Toast;
+    const component = (
+        <Toast message={toastNote() ?? ""} toastType={toastType} visible={(toastNote() !== null)} />
+    );
+
+    return [setAndClearNote, component];
+}

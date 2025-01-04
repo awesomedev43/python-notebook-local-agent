@@ -1,17 +1,19 @@
 import { Component, createResource, createSignal, onMount } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { KVStore, KVStoreKeys } from "./Store";
-import Toast, { ToastType } from "./Toast";
+import { createToastComponent, ToastType } from "./Toast";
 
 const Settings: Component<{}> = () => {
 
     const [executablePath, setExecutablePath] = createSignal<string>("");
     const [dataDirectory, setDataDirectory] = createSignal<string>("");
-    const [showToast, setShowToast] = createSignal<boolean>(false);
     const [init] = createResource(async () => {
         setExecutablePath(await KVStore.getStoreValue(KVStoreKeys.EXECUTABLE_PATH));
         setDataDirectory(await KVStore.getStoreValue(KVStoreKeys.DATA_DIRECTORY));
     });
+
+    let [showNoteToast, noteToastComponent] = createToastComponent(ToastType.Success);
+
 
     onMount(() => {
         init();
@@ -42,10 +44,7 @@ const Settings: Component<{}> = () => {
         await KVStore.setStoreValue(KVStoreKeys.DATA_DIRECTORY, dataDirectory());
         await KVStore.configureBackend();
 
-        setShowToast(true);
-        setTimeout(() => {
-            setShowToast(false);
-        }, 3000);
+        showNoteToast("Configuration Saved");
     }
 
     return (
@@ -82,7 +81,7 @@ const Settings: Component<{}> = () => {
                         </button>
                     </div>
                 </form>
-                <Toast message="Saved Configuration" visible={showToast()} toastType={ToastType.Success} />
+                {noteToastComponent}
             </div>
         </>
     );
