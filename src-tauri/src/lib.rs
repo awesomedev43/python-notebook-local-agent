@@ -34,7 +34,7 @@ struct RunArguments {
 
 #[tauri::command]
 fn run_notebook(
-    _app: AppHandle,
+    app: AppHandle,
     state: State<'_, Mutex<AppState>>,
     run_args: RunArguments,
 ) -> String {
@@ -45,7 +45,7 @@ fn run_notebook(
         (state.executable_path.clone(), state.data_directory.clone())
     };
     
-    let uuid = runner::execute_notebook(executable_path, data_directory, run_args.nb_path);
+    let uuid = runner::execute_notebook(app, executable_path, data_directory, run_args.nb_path);
     return format!("{:?}", uuid);
 }
 

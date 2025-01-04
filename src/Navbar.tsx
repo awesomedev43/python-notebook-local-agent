@@ -1,5 +1,5 @@
 import { Component, For } from "solid-js";
-import { IconProgressCheck, IconBriefcase, IconSettings, IconPlayerPlay, IconClock } from '@tabler/icons-solidjs';
+import { IconProgressCheck, IconSettings, IconPlayerPlay, IconClock } from '@tabler/icons-solidjs';
 import { A } from "@solidjs/router";
 
 type ButtonProps = {

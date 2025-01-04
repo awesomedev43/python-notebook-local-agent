@@ -1,7 +1,7 @@
 import { Component, createResource, createSignal, onMount } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { KVStore, KVStoreKeys } from "./Store";
-import Toast from "./Toast";
+import Toast, { ToastType } from "./Toast";
 
 const Settings: Component<{}> = () => {
 
@@ -82,7 +82,7 @@ const Settings: Component<{}> = () => {
                         </button>
                     </div>
                 </form>
-                <Toast message="Saved Configuration" visible={showToast()} error={false} />
+                <Toast message="Saved Configuration" visible={showToast()} toastType={ToastType.Success} />
             </div>
         </>
     );

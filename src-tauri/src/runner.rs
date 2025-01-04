@@ -1,6 +1,7 @@
 use std::fs::{self, File};
 use std::path::Path;
 use std::process::Command;
+use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 
 /**
@@ -11,6 +12,7 @@ use uuid::Uuid;
  * - Save the output to file
  */
 pub fn execute_notebook(
+    app: AppHandle,
     executable_path: String,
     data_directory: String,
     notebook_path: String,
@@ -20,7 +22,7 @@ pub fn execute_notebook(
     let filename: String = String::from(path.file_name().unwrap().to_str().unwrap());
     let execution_directory = format!("{}/{}-{}", data_directory, filename, id);
 
-    let log = format!("Finished Processing: id = {:?}, {:?} ", &id, &notebook_path);
+    let id_str = format!("{:?}", id);
 
     tauri::async_runtime::spawn(async move {
         fs::create_dir_all(&execution_directory).expect("Unable to create directory");
@@ -41,8 +43,10 @@ pub fn execute_notebook(
             .spawn()
             .expect("Failed to spawn executable");
 
-        child.wait().expect("Failed ot execute command");
-        println!("{}", &log);
+        child.wait().expect("Failed to execute command");
+        println!("{}", &id_str);
+
+        app.emit("notebook_run_complete", &id_str).unwrap();
     });
 
     return id;
