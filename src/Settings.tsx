@@ -1,16 +1,7 @@
 import { Component, createResource, createSignal, onMount } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { KVStore, KVStoreKeys } from "./Store";
-import { IconInfoCircle } from "@tabler/icons-solidjs";
-
-const SaveToast: Component<{ visible: boolean }> = (props) => {
-    return (
-        <div class={`transition ease-in-out delay-1000 flex flex-row items-center p-3 text-2xl text-white bg-blue-600 border-[1px] border-gray-400 rounded absolute bottom-3 right-3 ${props.visible ? "" : 'hidden'}`}>
-            <IconInfoCircle class="mr-2" />
-            Saved Configuration
-        </div>
-    );
-};
+import Toast from "./Toast";
 
 const Settings: Component<{}> = () => {
 
@@ -91,7 +82,7 @@ const Settings: Component<{}> = () => {
                         </button>
                     </div>
                 </form>
-                <SaveToast visible={showToast()} />
+                <Toast message="Saved Configuration" visible={showToast()} error={false} />
             </div>
         </>
     );

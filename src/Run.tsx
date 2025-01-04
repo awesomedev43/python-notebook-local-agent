@@ -1,9 +1,11 @@
 import { Component, createSignal } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
+import Toast from "./Toast";
 
 const Run: Component<{}> = () => {
     const [nbPath, setNbPath] = createSignal<string>("");
+    const [toastNote, setToastNote] = createSignal<boolean | null>(null);
 
     const openNbPathDialog = async (event: any) => {
         event.preventDefault();
@@ -21,8 +23,12 @@ const Run: Component<{}> = () => {
 
     const submissionAction = async (event: any) => {
         event.preventDefault();
-        console.log(event.target.nbPath.value);
-        invoke('run_notebook', { "runArgs": { "nb_path": event.target.nbPath.value } }).then((message) => { console.log(message) });
+        invoke('run_notebook', { "runArgs": { "nb_path": event.target.nbPath.value } }).then((message: any) => {
+            setToastNote(message);
+            setTimeout(() => {
+                setToastNote(null);
+            }, 3000);
+        });
     };
 
     return (
@@ -45,6 +51,8 @@ const Run: Component<{}> = () => {
                     Run
                 </button>
             </form>
+
+            <Toast message={`Started process with ID: ${toastNote()}`} error={false} visible={(toastNote() !== null)} />
 
         </div>
     );

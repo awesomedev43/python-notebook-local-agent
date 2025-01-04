@@ -20,13 +20,15 @@ pub fn execute_notebook(
     let filename: String = String::from(path.file_name().unwrap().to_str().unwrap());
     let execution_directory = format!("{}/{}-{}", data_directory, filename, id);
 
+    let log = format!("Finished Processing: id = {:?}, {:?} ", &id, &notebook_path);
+
     tauri::async_runtime::spawn(async move {
         fs::create_dir_all(&execution_directory).expect("Unable to create directory");
 
         let stdoutfilepath = format!("{}/output.log", &execution_directory);
         let stdoutfile = File::create(stdoutfilepath).expect("failed to open log");
 
-        let stderrfilepath = format!("{}/error.log", &execution_directory);
+        let stderrfilepath = format!("{}/execution.log", &execution_directory);
         let stderrfile = File::create(stderrfilepath).expect("failed to open log");
 
         let outputfile = format!("{}/{}", &execution_directory, &filename);
@@ -40,6 +42,7 @@ pub fn execute_notebook(
             .expect("Failed to spawn executable");
 
         child.wait().expect("Failed ot execute command");
+        println!("{}", &log);
     });
 
     return id;

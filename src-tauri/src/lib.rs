@@ -46,7 +46,7 @@ fn run_notebook(
     };
     
     let uuid = runner::execute_notebook(executable_path, data_directory, run_args.nb_path);
-    return format!("Started process with uuid = {:?}", uuid);
+    return format!("{:?}", uuid);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
