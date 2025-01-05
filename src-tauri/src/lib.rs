@@ -14,7 +14,6 @@ struct AppState {
     executable_path: String,
     data_directory: String,
     job_sender: Sender<NotebookJob>,
-    exit_sender: Sender<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -85,7 +84,6 @@ fn scheduler_loop<'r>(
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
     let (exit_sender, mut exit_receiver) = channel::<bool>();
-    let main_exit_sender = exit_sender.clone();
 
     std::thread::spawn(move || {
         let mut scheduler = JobScheduler::new();
@@ -101,7 +99,6 @@ pub fn run() {
                 executable_path: String::from(""),
                 data_directory: String::from(""),
                 job_sender: job_sender,
-                exit_sender: exit_sender,
             }));
             Ok(())
         })
@@ -109,5 +106,5 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 
-    main_exit_sender.send(false).unwrap();
+    exit_sender.send(false).unwrap();
 }
