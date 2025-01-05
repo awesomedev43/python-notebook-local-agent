@@ -80,6 +80,32 @@ fn scheduler_loop<'r>(
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct ScheduledRunArguments {
+    nb_path: String,
+    cron_string: String,
+}
+
+#[tauri::command]
+fn schedule_notebook(
+    _app: AppHandle,
+    state: State<'_, Mutex<AppState>>,
+    run_args: ScheduledRunArguments,
+) -> String {
+    println!("schedule_notebook {:?}", run_args);
+
+    let state = state.lock().unwrap();
+    state
+        .job_sender
+        .send(NotebookJob {
+            path: run_args.nb_path,
+            cron_schedule: run_args.cron_string,
+        })
+        .unwrap();
+
+    String::from("")
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
@@ -102,7 +128,11 @@ pub fn run() {
             }));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![run_notebook, configure_app])
+        .invoke_handler(tauri::generate_handler![
+            run_notebook,
+            configure_app,
+            schedule_notebook
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 

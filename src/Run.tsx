@@ -36,8 +36,15 @@ const Run: Component<{}> = () => {
             showFailureToast("No Notebook Specified");
             return;
         }
-        if (event.target.scheduledCheck) {
-            console.log(`TODO: ${event.target.cronschedule.value}`);
+        if (event.target.scheduledCheck.checked) {
+            invoke('schedule_notebook', {
+                "runArgs": {
+                    "nb_path": event.target.nbPath.value,
+                    "cron_string": event.target.cronschedule.value
+                }
+            }).then((message: any) => {
+                showNoteToast(` Scheduled Notebook ${message}`);
+            });
         }
         else {
             invoke('run_notebook', { "runArgs": { "nb_path": event.target.nbPath.value } }).then((message: any) => {
