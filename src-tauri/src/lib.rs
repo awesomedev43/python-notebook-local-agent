@@ -14,6 +14,7 @@ struct AppState {
     executable_path: String,
     data_directory: String,
     job_sender: Sender<NotebookJob>,
+    job_id_receiver: Receiver<job_scheduler::Uuid>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -65,6 +66,7 @@ fn scheduler_loop<'r>(
     job_receiver: &mut Receiver<NotebookJob>,
     exit_receiver: &mut Receiver<bool>,
     sched: &mut JobScheduler<'r>,
+    job_id_sender: &Sender<job_scheduler::Uuid>,
 ) {
     loop {
         let job = job_receiver.recv_timeout(Duration::from_millis(1000));
@@ -73,18 +75,16 @@ fn scheduler_loop<'r>(
 
             let jobclone = job.unwrap().clone();
             let schedule = jobclone.cron_schedule.clone();
-            sched.add(Job::new(
-                schedule.parse().unwrap(),
-                move || {
-                    let uuid = runner::execute_notebook(
-                        None,
-                        jobclone.executable_path.clone(),
-                        jobclone.data_directory.clone(),
-                        jobclone.path.clone(),
-                    );
-                    println!("Scheduled Job with UUID: {:?}", uuid);
-                },
-            ));
+            let id = sched.add(Job::new(schedule.parse().unwrap(), move || {
+                let uuid = runner::execute_notebook(
+                    None,
+                    jobclone.executable_path.clone(),
+                    jobclone.data_directory.clone(),
+                    jobclone.path.clone(),
+                );
+                println!("Scheduled Job with UUID: {:?}", uuid);
+            }));
+            job_id_sender.send(id).unwrap();
         }
 
         let exit = exit_receiver.recv_timeout(Duration::from_millis(200));
@@ -123,17 +123,28 @@ fn schedule_notebook(
         })
         .unwrap();
 
-    String::from("")
+    let uuid = state.job_id_receiver.recv();
+    if uuid.is_ok() {
+        println!("Scheduled with Uuid = {:?}", uuid.unwrap());
+    }
+
+    format!("{:?}", uuid)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
     let (exit_sender, mut exit_receiver) = channel::<bool>();
+    let (job_id_sender, job_id_receiver) = channel::<job_scheduler::Uuid>();
 
-    std::thread::spawn(move || {
+    let handle = std::thread::spawn(move || {
         let mut scheduler = JobScheduler::new();
-        scheduler_loop(&mut job_receiver, &mut exit_receiver, &mut scheduler);
+        scheduler_loop(
+            &mut job_receiver,
+            &mut exit_receiver,
+            &mut scheduler,
+            &job_id_sender,
+        );
     });
 
     tauri::Builder::default()
@@ -145,6 +156,7 @@ pub fn run() {
                 executable_path: String::from(""),
                 data_directory: String::from(""),
                 job_sender: job_sender,
+                job_id_receiver: job_id_receiver,
             }));
             Ok(())
         })
@@ -157,4 +169,5 @@ pub fn run() {
         .expect("error while running tauri application");
 
     exit_sender.send(false).unwrap();
+    handle.join().expect("Failed to join");
 }
