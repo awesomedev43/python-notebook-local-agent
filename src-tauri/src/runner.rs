@@ -12,7 +12,7 @@ use uuid::Uuid;
  * - Save the output to file
  */
 pub fn execute_notebook(
-    app: AppHandle,
+    app: Option<AppHandle>,
     executable_path: String,
     data_directory: String,
     notebook_path: String,
@@ -46,7 +46,9 @@ pub fn execute_notebook(
         child.wait().expect("Failed to execute command");
         println!("{}", &id_str);
 
-        app.emit("notebook_run_complete", &id_str).unwrap();
+        if app.is_some() {
+            app.unwrap().emit("notebook_run_complete", &id_str).unwrap();
+        }
     });
 
     return id;

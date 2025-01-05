@@ -3,7 +3,7 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{sync::Mutex, time::Duration};
 
-use job_scheduler::JobScheduler;
+use job_scheduler::{Job, JobScheduler};
 use serde::{Deserialize, Serialize};
 use tauri::{App, AppHandle, Manager, State};
 
@@ -48,14 +48,17 @@ fn run_notebook(
         (state.executable_path.clone(), state.data_directory.clone())
     };
 
-    let uuid = runner::execute_notebook(app, executable_path, data_directory, run_args.nb_path);
+    let uuid =
+        runner::execute_notebook(Some(app), executable_path, data_directory, run_args.nb_path);
     return format!("{:?}", uuid);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct NotebookJob {
     path: String,
     cron_schedule: String,
+    executable_path: String,
+    data_directory: String,
 }
 
 fn scheduler_loop<'r>(
@@ -67,6 +70,21 @@ fn scheduler_loop<'r>(
         let job = job_receiver.recv_timeout(Duration::from_millis(1000));
         if job.is_ok() {
             println!("Job: {:?}", job);
+
+            let jobclone = job.unwrap().clone();
+            let schedule = jobclone.cron_schedule.clone();
+            sched.add(Job::new(
+                schedule.parse().unwrap(),
+                move || {
+                    let uuid = runner::execute_notebook(
+                        None,
+                        jobclone.executable_path.clone(),
+                        jobclone.data_directory.clone(),
+                        jobclone.path.clone(),
+                    );
+                    println!("Scheduled Job with UUID: {:?}", uuid);
+                },
+            ));
         }
 
         let exit = exit_receiver.recv_timeout(Duration::from_millis(200));
@@ -100,6 +118,8 @@ fn schedule_notebook(
         .send(NotebookJob {
             path: run_args.nb_path,
             cron_schedule: run_args.cron_string,
+            executable_path: state.executable_path.clone(),
+            data_directory: state.data_directory.clone(),
         })
         .unwrap();
 
