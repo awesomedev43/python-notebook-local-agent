@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component, createSignal, Show } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { createToastComponent, ToastType } from "./Toast";
@@ -6,6 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 
 const Run: Component<{}> = () => {
     const [nbPath, setNbPath] = createSignal<string>("");
+    const [scheduled, setScheduled] = createSignal<boolean>(false);
     let [showSuccessToast, successToastComponent] = createToastComponent(ToastType.Success);
     let [showNoteToast, noteToastComponent] = createToastComponent(ToastType.Note);
     let [showFailureToast, failureToastComponent] = createToastComponent(ToastType.Error);
@@ -44,6 +45,19 @@ const Run: Component<{}> = () => {
         <div class="w-full max-w-xl">
             <form class="bg-white rounded pb-4 mb-2 relative" onSubmit={submissionAction}>
                 <h1 class="text-xl mb-4 font-bold">Run Notebook</h1>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="notebook-path">
+                        Run Type
+                    </label>
+                    <div class="flex flex-row gap-2">
+                        <input type="radio" checked={scheduled()} onClick={(_) => setScheduled(true)} id="scheduledCheck" />
+                        <label class="text-md">Scheduled</label>
+                        <input type="radio" checked={!scheduled()} onClick={(_) => setScheduled(false)} />
+                        <label class="text-md">One Off</label>
+                    </div>
+                </div>
+
                 <div class="mb-1">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="notebook-path">
                         Notebook Path
@@ -56,8 +70,19 @@ const Run: Component<{}> = () => {
                     </div>
                 </div>
 
+                <Show when={scheduled()} >
+                    <div class="mb-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="notebook-path">
+                            Cron Schedule
+                        </label>
+                        <div class="flex flex-row gap-2">
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="cronschedule" type="text" />
+                        </div>
+                    </div>
+                </Show>
+
                 <button class="bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                    Run
+                    {scheduled() ? "Schedule" : "Run"}
                 </button>
             </form>
 
