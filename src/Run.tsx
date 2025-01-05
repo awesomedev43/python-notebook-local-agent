@@ -36,9 +36,15 @@ const Run: Component<{}> = () => {
             showFailureToast("No Notebook Specified");
             return;
         }
-        invoke('run_notebook', { "runArgs": { "nb_path": event.target.nbPath.value } }).then((message: any) => {
-            showNoteToast(`Started execution for Notebook with ID: ${message}`);
-        });
+        if (event.target.scheduledCheck) {
+            console.log(`TODO: ${event.target.cronschedule.value}`);
+        }
+        else {
+            invoke('run_notebook', { "runArgs": { "nb_path": event.target.nbPath.value } }).then((message: any) => {
+                showNoteToast(`Started execution for Notebook with ID: ${message}`);
+            });
+        }
+
     };
 
     return (
