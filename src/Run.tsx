@@ -3,6 +3,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { createToastComponent, ToastType } from "./Toast";
 import { listen } from '@tauri-apps/api/event';
+import cron from "cron-validate";
 
 const Run: Component<{}> = () => {
     const [nbPath, setNbPath] = createSignal<string>("");
@@ -37,6 +38,17 @@ const Run: Component<{}> = () => {
             return;
         }
         if (event.target.scheduledCheck.checked) {
+            const cronResult = cron(event.target.cronschedule.value, {
+                preset: 'default',
+                override: {
+                    useSeconds: true
+                }
+            });
+            if (!cronResult.isValid() || cronResult.getValue().seconds === undefined) {
+                showFailureToast(`Invalid cron expression: ${event.target.cronschedule.value}`);
+                return;
+            }
+
             invoke('schedule_notebook', {
                 "runArgs": {
                     "nb_path": event.target.nbPath.value,
