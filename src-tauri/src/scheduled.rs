@@ -16,7 +16,7 @@ pub struct ScheduledDB {
 
 impl ScheduledDB {
     pub fn new(local_data_path: &Path) -> Self {
-        let dbpath = format!("{}/scheduled.db3", local_data_path.to_str().unwrap());
+        let dbpath = local_data_path.join("scheduled.db3");
         Self {
             connection: Connection::open(dbpath).unwrap(),
         }
@@ -24,7 +24,7 @@ impl ScheduledDB {
 
     pub fn initialize(&self) {
         match self.connection.execute(
-            "CREATE TABLE scheduledJob (
+            "CREATE TABLE IF NOT EXISTS scheduledJob (
                 id           TEXT NOT NULL,
                 jobId        TEXT,
                 nbPath       TEXT NOT NULL,
