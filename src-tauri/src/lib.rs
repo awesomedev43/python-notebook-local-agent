@@ -4,10 +4,13 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{sync::Mutex, time::Duration};
 
 use job_scheduler::{Job, JobScheduler};
+use scheduled::{ScheduledDB, ScheduledData};
 use serde::{Deserialize, Serialize};
 use tauri::{App, AppHandle, Manager, State};
+use uuid;
 
 mod runner;
+mod scheduled;
 
 #[derive(Debug)]
 struct AppState {
@@ -15,6 +18,7 @@ struct AppState {
     data_directory: String,
     job_sender: Sender<NotebookJob>,
     job_id_receiver: Receiver<job_scheduler::Uuid>,
+    scheduled_db: ScheduledDB,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -116,8 +120,8 @@ fn schedule_notebook(
     state
         .job_sender
         .send(NotebookJob {
-            path: run_args.nb_path,
-            cron_schedule: run_args.cron_string,
+            path: run_args.nb_path.clone(),
+            cron_schedule: run_args.cron_string.clone(),
             executable_path: state.executable_path.clone(),
             data_directory: state.data_directory.clone(),
         })
@@ -127,6 +131,13 @@ fn schedule_notebook(
     if uuid.is_ok() {
         println!("Scheduled with Uuid = {:?}", uuid.unwrap());
     }
+    let scheduled_data = ScheduledData {
+        nb_path: run_args.nb_path,
+        cron_schedule: run_args.cron_string,
+        job_id: format!("{:?}", uuid),
+        id: format!("{:?}", uuid::Uuid::new_v4()),
+    };
+    state.scheduled_db.store(&scheduled_data);
 
     format!("{:?}", uuid)
 }
@@ -152,11 +163,14 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app: &mut App| {
+            let scheduled_db = ScheduledDB::new(app.path().app_local_data_dir().unwrap().as_path());
+            scheduled_db.initialize();
             app.manage(Mutex::new(AppState {
                 executable_path: String::from(""),
                 data_directory: String::from(""),
                 job_sender: job_sender,
                 job_id_receiver: job_id_receiver,
+                scheduled_db,
             }));
             Ok(())
         })
