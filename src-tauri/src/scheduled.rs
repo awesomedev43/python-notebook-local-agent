@@ -1,6 +1,9 @@
 use std::path::Path;
 
 use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
 
 pub struct ScheduledData {
     pub nb_path: String,
@@ -44,5 +47,24 @@ impl ScheduledDB {
                 (&data.id, &data.job_id, &data.nb_path, &data.cron_schedule),
             )
             .unwrap();
+    }
+
+    pub fn fetch_all(&self) -> Vec<ScheduledData> {
+        let mut stmt = self
+            .connection
+            .prepare("SELECT id, jobId, nbPath, cronSchedule FROM scheduledJob")
+            .unwrap();
+        let iter = stmt
+            .query_map([], |row| {
+                Ok(ScheduledData {
+                    id: row.get(0).unwrap(),
+                    job_id: row.get(1).unwrap(),
+                    nb_path: row.get(2).unwrap(),
+                    cron_schedule: row.get(3).unwrap(),
+                })
+            })
+            .unwrap();
+        let res = iter.map(|x| x.unwrap()).collect();
+        res
     }
 }

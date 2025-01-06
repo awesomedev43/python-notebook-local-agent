@@ -142,6 +142,13 @@ fn schedule_notebook(
     format!("{:?}", uuid)
 }
 
+#[tauri::command]
+fn get_all_scheduled(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<ScheduledData> {
+    println!("get_all_scheduled");
+    let state = state.lock().unwrap();
+    state.scheduled_db.fetch_all()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
@@ -177,7 +184,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             run_notebook,
             configure_app,
-            schedule_notebook
+            schedule_notebook,
+            get_all_scheduled
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
