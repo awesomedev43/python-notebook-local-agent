@@ -49,6 +49,12 @@ impl ScheduledDB {
             .unwrap();
     }
 
+    pub fn delete(&self, id: &str) {
+        self.connection
+            .execute("DELETE from scheduledJob where id = ?1", [&id])
+            .unwrap();
+    }
+
     pub fn fetch_all(&self) -> Vec<ScheduledData> {
         let mut stmt = self
             .connection

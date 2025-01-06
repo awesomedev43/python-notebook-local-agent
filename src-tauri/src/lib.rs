@@ -19,6 +19,7 @@ struct AppState {
     job_sender: Sender<NotebookJob>,
     job_id_receiver: Receiver<job_scheduler::Uuid>,
     scheduled_db: ScheduledDB,
+    job_cancel_sender: Sender<job_scheduler::Uuid>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -71,14 +72,15 @@ fn scheduler_loop<'r>(
     exit_receiver: &mut Receiver<bool>,
     sched: &mut JobScheduler<'r>,
     job_id_sender: &Sender<job_scheduler::Uuid>,
+    job_cancel_receiver: &mut Receiver<job_scheduler::Uuid>,
 ) {
     loop {
         let job = job_receiver.recv_timeout(Duration::from_millis(1000));
         if job.is_ok() {
             println!("Job: {:?}", job);
 
-            let jobclone = job.unwrap().clone();
-            let schedule = jobclone.cron_schedule.clone();
+            let jobclone = job.unwrap();
+            let schedule = jobclone.cron_schedule;
             let id = sched.add(Job::new(schedule.parse().unwrap(), move || {
                 let uuid = runner::execute_notebook(
                     None,
@@ -95,6 +97,12 @@ fn scheduler_loop<'r>(
         if exit.is_ok() && exit.unwrap() {
             println!("Exiting Scheduler Thread");
             break;
+        }
+
+        let cancel = job_cancel_receiver.recv_timeout(Duration::from_millis(200));
+        if cancel.is_ok() {
+            let res = sched.remove(cancel.unwrap());
+            println!("Removed job {}: {}", cancel.unwrap(), res);
         }
 
         sched.tick();
@@ -149,10 +157,28 @@ fn get_all_scheduled(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<
     state.scheduled_db.fetch_all()
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct CancelScheduledRunArguments {
+    id: String,
+    job_id: String,
+}
+
 #[tauri::command]
-fn cancel_scheduled_job(_app: AppHandle, state: State<'_, Mutex<AppState>>, job_ids: Vec<String>) -> Result<(), String> {
+fn cancel_scheduled_job(
+    _app: AppHandle,
+    state: State<'_, Mutex<AppState>>,
+    cancel_args: Vec<CancelScheduledRunArguments>,
+) -> Result<(), String> {
     let state = state.lock().unwrap();
-    println!("{:?}", job_ids);
+
+    println!("{:?}", &cancel_args);
+    for cancel_arg in cancel_args {
+        state
+            .job_cancel_sender
+            .send(job_scheduler::Uuid::parse_str(&cancel_arg.job_id).unwrap())
+            .unwrap();
+        state.scheduled_db.delete(&cancel_arg.id);
+    }
     Ok(())
 }
 
@@ -161,6 +187,7 @@ pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
     let (exit_sender, mut exit_receiver) = channel::<bool>();
     let (job_id_sender, job_id_receiver) = channel::<job_scheduler::Uuid>();
+    let (job_cancel_sender, mut job_cancel_receiver) = channel::<job_scheduler::Uuid>();
 
     let handle = std::thread::spawn(move || {
         let mut scheduler = JobScheduler::new();
@@ -169,6 +196,7 @@ pub fn run() {
             &mut exit_receiver,
             &mut scheduler,
             &job_id_sender,
+            &mut job_cancel_receiver,
         );
     });
 
@@ -189,6 +217,7 @@ pub fn run() {
                 job_sender: job_sender,
                 job_id_receiver: job_id_receiver,
                 scheduled_db,
+                job_cancel_sender,
             }));
             Ok(())
         })

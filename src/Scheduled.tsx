@@ -8,19 +8,29 @@ type ScheduledData = {
     cron_schedule: string,
 }
 
-const Scheduled: Component<{}> = () => {
-    let myCancelItems = new Set<string>();
+type CancelScheduledData = {
+    id: string,
+    job_id: string,
+}
 
-    const [init] = createResource(async (): Promise<ScheduledData[]> => {
+const Scheduled: Component<{}> = () => {
+    let myCancelItems = new Set<CancelScheduledData>();
+
+    const [init, {refetch}] = createResource(async (): Promise<ScheduledData[]> => {
         const result: ScheduledData[] = await invoke('get_all_scheduled', {});
         return result;
     });
 
     const onCancel = (_: any) => {
-        if (myCancelItems.size == 0 ){
+        if (myCancelItems.size == 0) {
             return;
         }
-        invoke("cancel_scheduled_job", { "jobIds": Array.from(myCancelItems) }).then(() => {});
+        invoke("cancel_scheduled_job", {
+            'cancelArgs':
+                Array.from(myCancelItems)
+        }).then(() => { 
+            refetch();
+        });
     }
 
     return (
@@ -39,10 +49,16 @@ const Scheduled: Component<{}> = () => {
                             <tr class="text-center border p-3 text-md">
                                 <td class="py-1"><input type="checkbox" id={item.job_id} onClick={(e) => {
                                     if (e.currentTarget.checked) {
-                                        myCancelItems.add(e.currentTarget.id);
+                                        myCancelItems.add({
+                                            "id": item.id,
+                                            "job_id": item.job_id,
+                                        });
                                     }
                                     else {
-                                        myCancelItems.delete(e.currentTarget.id);
+                                        myCancelItems.delete({
+                                            "id": item.id,
+                                            "job_id": item.job_id,
+                                        });
                                     }
                                 }} /></td>
                                 <td class="py-1">{item.nb_path}</td>
