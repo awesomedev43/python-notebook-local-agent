@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Component, createResource, createSignal, For, Index, onMount } from "solid-js";
+import { Component, createResource, For } from "solid-js";
 
 type ScheduledData = {
     id: string,
@@ -9,7 +9,6 @@ type ScheduledData = {
 }
 
 const Scheduled: Component<{}> = () => {
-    const [cancelItems, setCancelItems] = createSignal<Set<string>>(new Set<string>());
     let myCancelItems = new Set<string>();
 
     const [init] = createResource(async (): Promise<ScheduledData[]> => {
@@ -17,9 +16,13 @@ const Scheduled: Component<{}> = () => {
         return result;
     });
 
+    const onCancel = (_: any) => {
+        alert(`cancelling ${Array.from(myCancelItems)}`);
+    }
+
     return (
-        <>
-            <table class="table-auto w-11/12 pl-4">
+        <div class="flex flex-col mr-4">
+            <table class="table-fixed w-full pl-4 mb-4">
                 <thead>
                     <tr class="bg-gray-200 text-black p-3 text-xl">
                         <th></th>
@@ -38,18 +41,6 @@ const Scheduled: Component<{}> = () => {
                                     else {
                                         myCancelItems.delete(e.currentTarget.id);
                                     }
-                                    console.log(myCancelItems);
-                                    
-                                    setCancelItems((prev: Set<string>) => {
-                                        let newSet = new Set<string>(prev); 
-                                        if (e.currentTarget.checked) {
-                                            newSet.add(e.currentTarget.id);
-                                        }
-                                        else {
-                                            newSet.delete(e.currentTarget.id);
-                                        }
-                                        return newSet;
-                                    });
                                 }} /></td>
                                 <td>{item.nb_path}</td>
                                 <td>{item.cron_schedule}</td>
@@ -58,15 +49,10 @@ const Scheduled: Component<{}> = () => {
                     </For>
                 </tbody>
             </table>
-            <h1>Items</h1>
-            <>
-                <For each={[...cancelItems().values()]}>
-                    {(item, _) =>
-                        <p>{item}</p>
-                    }
-                </For>
-            </>
-        </>
+            <button class="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-32 self-end" onClick={onCancel}>
+                Cancel
+            </button>
+        </div>
     );
 };
 
