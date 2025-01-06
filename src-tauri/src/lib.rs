@@ -3,12 +3,14 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{sync::Mutex, time::Duration};
 
+use completed::CompletedDB;
 use job_scheduler::{Job, JobScheduler};
 use scheduled::{ScheduledDB, ScheduledData};
 use serde::{Deserialize, Serialize};
 use tauri::{App, AppHandle, Manager, State};
 use uuid;
 
+mod completed;
 mod runner;
 mod scheduled;
 
@@ -20,6 +22,7 @@ struct AppState {
     job_id_receiver: Receiver<job_scheduler::Uuid>,
     scheduled_db: ScheduledDB,
     job_cancel_sender: Sender<job_scheduler::Uuid>,
+    completed_db: CompletedDB,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -211,6 +214,10 @@ pub fn run() {
             );
             let scheduled_db = ScheduledDB::new(app.path().app_local_data_dir().unwrap().as_path());
             scheduled_db.initialize();
+
+            let completed_db = CompletedDB::new(app.path().app_local_data_dir().unwrap().as_path());
+            completed_db.initialize();
+
             app.manage(Mutex::new(AppState {
                 executable_path: String::from(""),
                 data_directory: String::from(""),
@@ -218,6 +225,7 @@ pub fn run() {
                 job_id_receiver: job_id_receiver,
                 scheduled_db,
                 job_cancel_sender,
+                completed_db,
             }));
             Ok(())
         })

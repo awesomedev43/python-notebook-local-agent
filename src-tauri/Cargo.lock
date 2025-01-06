@@ -2947,6 +2947,7 @@ dependencies = [
 name = "pynb-worker"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "job_scheduler",
  "rusqlite",
  "serde",
