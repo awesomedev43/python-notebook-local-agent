@@ -149,6 +149,13 @@ fn get_all_scheduled(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<
     state.scheduled_db.fetch_all()
 }
 
+#[tauri::command]
+fn cancel_scheduled_job(_app: AppHandle, state: State<'_, Mutex<AppState>>, job_ids: Vec<String>) -> Result<(), String> {
+    let state = state.lock().unwrap();
+    println!("{:?}", job_ids);
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
@@ -189,7 +196,8 @@ pub fn run() {
             run_notebook,
             configure_app,
             schedule_notebook,
-            get_all_scheduled
+            get_all_scheduled,
+            cancel_scheduled_job
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

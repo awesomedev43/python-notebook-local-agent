@@ -17,24 +17,27 @@ const Scheduled: Component<{}> = () => {
     });
 
     const onCancel = (_: any) => {
-        alert(`cancelling ${Array.from(myCancelItems)}`);
+        if (myCancelItems.size == 0 ){
+            return;
+        }
+        invoke("cancel_scheduled_job", { "jobIds": Array.from(myCancelItems) }).then(() => {});
     }
 
     return (
         <div class="flex flex-col mr-4">
-            <table class="table-fixed w-full pl-4 mb-4">
+            <table class="table-auto w-full pl-4 mb-4">
                 <thead>
-                    <tr class="bg-gray-200 text-black p-3 text-xl">
-                        <th></th>
-                        <th>Notebook</th>
-                        <th>Cron Schedule</th>
+                    <tr class="bg-gray-200 text-black text-xl">
+                        <th class="py-1"></th>
+                        <th class="py-1">Notebook</th>
+                        <th class="py-1">Cron Schedule</th>
                     </tr>
                 </thead>
                 <tbody>
                     <For each={init()}>
                         {(item, _) => (
                             <tr class="text-center border p-3 text-md">
-                                <td><input type="checkbox" id={item.job_id} onClick={(e) => {
+                                <td class="py-1"><input type="checkbox" id={item.job_id} onClick={(e) => {
                                     if (e.currentTarget.checked) {
                                         myCancelItems.add(e.currentTarget.id);
                                     }
@@ -42,8 +45,8 @@ const Scheduled: Component<{}> = () => {
                                         myCancelItems.delete(e.currentTarget.id);
                                     }
                                 }} /></td>
-                                <td>{item.nb_path}</td>
-                                <td>{item.cron_schedule}</td>
+                                <td class="py-1">{item.nb_path}</td>
+                                <td class="py-1">{item.cron_schedule}</td>
                             </tr>
                         )}
                     </For>
