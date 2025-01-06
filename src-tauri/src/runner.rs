@@ -1,8 +1,13 @@
 use std::fs::{self, File};
 use std::path::Path;
 use std::process::Command;
-use tauri::{AppHandle, Emitter};
+use std::sync::Mutex;
+use chrono::Utc;
+use tauri::{AppHandle, Emitter, Manager, State};
 use uuid::Uuid;
+
+use crate::completed::CompletedJobData;
+use crate::AppState;
 
 /**
  * This function will do the following
@@ -12,7 +17,7 @@ use uuid::Uuid;
  * - Save the output to file
  */
 pub fn execute_notebook(
-    app: Option<AppHandle>,
+    app: AppHandle,
     executable_path: String,
     data_directory: String,
     notebook_path: String,
@@ -46,9 +51,15 @@ pub fn execute_notebook(
         child.wait().expect("Failed to execute command");
         println!("{}", &id_str);
 
-        if app.is_some() {
-            app.unwrap().emit("notebook_run_complete", &id_str).unwrap();
-        }
+        let state: State<'_, Mutex<AppState>> = app.state();
+        state.lock().unwrap().completed_db.store(&CompletedJobData {
+            id: id.to_string(),
+            job_id: None,
+            output_path: notebook_path,
+            completed: Utc::now().timestamp(),
+        });
+
+        app.emit("notebook_run_complete", &id_str).unwrap();
     });
 
     return id;

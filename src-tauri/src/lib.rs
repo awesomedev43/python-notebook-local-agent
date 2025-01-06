@@ -15,14 +15,14 @@ mod runner;
 mod scheduled;
 
 #[derive(Debug)]
-struct AppState {
-    executable_path: String,
-    data_directory: String,
-    job_sender: Sender<NotebookJob>,
-    job_id_receiver: Receiver<job_scheduler::Uuid>,
-    scheduled_db: ScheduledDB,
-    job_cancel_sender: Sender<job_scheduler::Uuid>,
-    completed_db: CompletedDB,
+pub struct AppState {
+    pub executable_path: String,
+    pub data_directory: String,
+    pub job_sender: Sender<NotebookJob>,
+    pub job_id_receiver: Receiver<job_scheduler::Uuid>,
+    pub scheduled_db: ScheduledDB,
+    pub job_cancel_sender: Sender<job_scheduler::Uuid>,
+    pub completed_db: CompletedDB,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -58,16 +58,16 @@ fn run_notebook(
     };
 
     let uuid =
-        runner::execute_notebook(Some(app), executable_path, data_directory, run_args.nb_path);
+        runner::execute_notebook(app, executable_path, data_directory, run_args.nb_path);
     return format!("{:?}", uuid);
 }
 
 #[derive(Debug, Clone)]
-struct NotebookJob {
-    path: String,
-    cron_schedule: String,
-    executable_path: String,
-    data_directory: String,
+pub struct NotebookJob {
+    pub path: String,
+    pub cron_schedule: String,
+    pub executable_path: String,
+    pub data_directory: String,
 }
 
 fn scheduler_loop<'r>(
@@ -76,17 +76,19 @@ fn scheduler_loop<'r>(
     sched: &mut JobScheduler<'r>,
     job_id_sender: &Sender<job_scheduler::Uuid>,
     job_cancel_receiver: &mut Receiver<job_scheduler::Uuid>,
+    app_handle: AppHandle,
 ) {
     loop {
         let job = job_receiver.recv_timeout(Duration::from_millis(1000));
         if job.is_ok() {
             println!("Job: {:?}", job);
+            let handle_clone = app_handle.clone();
 
             let jobclone = job.unwrap();
             let schedule = jobclone.cron_schedule;
             let id = sched.add(Job::new(schedule.parse().unwrap(), move || {
                 let uuid = runner::execute_notebook(
-                    None,
+                    handle_clone.clone(),
                     jobclone.executable_path.clone(),
                     jobclone.data_directory.clone(),
                     jobclone.path.clone(),
@@ -192,18 +194,7 @@ pub fn run() {
     let (job_id_sender, job_id_receiver) = channel::<job_scheduler::Uuid>();
     let (job_cancel_sender, mut job_cancel_receiver) = channel::<job_scheduler::Uuid>();
 
-    let handle = std::thread::spawn(move || {
-        let mut scheduler = JobScheduler::new();
-        scheduler_loop(
-            &mut job_receiver,
-            &mut exit_receiver,
-            &mut scheduler,
-            &job_id_sender,
-            &mut job_cancel_receiver,
-        );
-    });
-
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
@@ -236,8 +227,24 @@ pub fn run() {
             get_all_scheduled,
             cancel_scheduled_job
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("failed to build tauri app instance");
+
+    let app_handle = app.handle().clone();
+
+    let handle = std::thread::spawn(move || {
+        let mut scheduler = JobScheduler::new();
+        scheduler_loop(
+            &mut job_receiver,
+            &mut exit_receiver,
+            &mut scheduler,
+            &job_id_sender,
+            &mut job_cancel_receiver,
+            app_handle,
+        );
+    });
+
+    app.run(|_app_handle, _event| {});
 
     exit_sender.send(false).unwrap();
     handle.join().expect("Failed to join");

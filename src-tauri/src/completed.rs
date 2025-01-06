@@ -31,20 +31,20 @@ impl CompletedDB {
                 id           TEXT NOT NULL,
                 job_id       TEXT,
                 outputPath   TEXT NOT NULL,
-                completed    TIMESTAMP,
+                completed    TIMESTAMP
             )",
             (), // empty list of parameters.
         ) {
             Ok(_) => {}
-            Err(_) => {}
+            Err(e) => println!("Failed to create table {:?}", e),
         }
     }
 
     pub fn store(&self, data: &CompletedJobData) {
         self.connection
             .execute(
-                "INSERT INTO completedJob (id, job_id, outputPath, completed) VALUES (?1, ?2, ?3, ?4, ?5)",
-                (&data.id, &data.job_id, &data.id, &data.output_path, &data.completed),
+                "INSERT INTO completedJob (id, job_id, outputPath, completed) VALUES (?1, ?2, ?3, ?4)",
+                (&data.id, &data.job_id, &data.output_path, &data.completed),
             )
             .unwrap();
     }
