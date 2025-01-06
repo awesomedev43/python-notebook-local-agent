@@ -134,7 +134,7 @@ fn schedule_notebook(
     let scheduled_data = ScheduledData {
         nb_path: run_args.nb_path,
         cron_schedule: run_args.cron_string,
-        job_id: format!("{:?}", uuid),
+        job_id: format!("{:?}", uuid.unwrap()),
         id: format!("{:?}", uuid::Uuid::new_v4()),
     };
     state.scheduled_db.store(&scheduled_data);
@@ -170,6 +170,10 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app: &mut App| {
+            println!(
+                "Local database path: {:?}",
+                app.path().app_local_data_dir().unwrap().as_path()
+            );
             let scheduled_db = ScheduledDB::new(app.path().app_local_data_dir().unwrap().as_path());
             scheduled_db.initialize();
             app.manage(Mutex::new(AppState {
