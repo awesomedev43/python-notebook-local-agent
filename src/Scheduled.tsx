@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Component, createResource, For } from "solid-js";
+import cronstrue from 'cronstrue';
 
 type ScheduledData = {
     id: string,
@@ -16,7 +17,7 @@ type CancelScheduledData = {
 const Scheduled: Component<{}> = () => {
     let myCancelItems = new Set<CancelScheduledData>();
 
-    const [init, {refetch}] = createResource(async (): Promise<ScheduledData[]> => {
+    const [init, { refetch }] = createResource(async (): Promise<ScheduledData[]> => {
         const result: ScheduledData[] = await invoke('get_all_scheduled', {});
         return result;
     });
@@ -28,7 +29,7 @@ const Scheduled: Component<{}> = () => {
         invoke("cancel_scheduled_job", {
             'cancelArgs':
                 Array.from(myCancelItems)
-        }).then(() => { 
+        }).then(() => {
             refetch();
         });
     }
@@ -62,7 +63,7 @@ const Scheduled: Component<{}> = () => {
                                     }
                                 }} /></td>
                                 <td class="py-1">{item.nb_path}</td>
-                                <td class="py-1">{item.cron_schedule}</td>
+                                <td class="py-1">{cronstrue.toString(item.cron_schedule)}</td>
                             </tr>
                         )}
                     </For>
