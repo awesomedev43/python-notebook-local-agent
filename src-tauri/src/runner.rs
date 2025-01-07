@@ -27,7 +27,7 @@ pub fn execute_notebook(
     let filename: String = String::from(path.file_name().unwrap().to_str().unwrap());
     let execution_directory = format!("{}/{}-{}", data_directory, filename, id);
 
-    let id_str = format!("{:?}", id);
+    let id_str = id.to_string();
 
     tauri::async_runtime::spawn(async move {
         fs::create_dir_all(&execution_directory).expect("Unable to create directory");

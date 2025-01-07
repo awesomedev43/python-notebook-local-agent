@@ -147,12 +147,12 @@ fn schedule_notebook(
     let scheduled_data = ScheduledData {
         nb_path: run_args.nb_path,
         cron_schedule: run_args.cron_string,
-        job_id: format!("{:?}", uuid.unwrap()),
-        id: format!("{:?}", uuid::Uuid::new_v4()),
+        job_id: uuid.unwrap().to_string(),
+        id: uuid::Uuid::new_v4().to_string(),
     };
     state.scheduled_db.store(&scheduled_data);
 
-    format!("{:?}", uuid)
+    uuid.unwrap().to_string()
 }
 
 #[tauri::command]
