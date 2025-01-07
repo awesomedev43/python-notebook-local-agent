@@ -42,7 +42,7 @@ pub fn execute_notebook(
 
         let mut child = Command::new(executable_path)
             .args(["-m", "papermill", &notebook_path, &outputfile])
-            .current_dir(data_directory)
+            .current_dir(data_directory.clone())
             .stderr(stderrfile)
             .stdout(stdoutfile)
             .spawn()
@@ -55,7 +55,7 @@ pub fn execute_notebook(
         state.lock().unwrap().completed_db.store(&CompletedJobData {
             id: id.to_string(),
             job_id: None,
-            output_path: notebook_path,
+            output_path: data_directory,
             completed: Utc::now().timestamp(),
         });
 
