@@ -7,12 +7,13 @@ import Landing from "./Landing"
 import Settings from "./Settings";
 import Run from "./Run";
 import Scheduled from "./Scheduled";
+import Completed from "./Completed";
 
 render(() => {
     return <Router root={App}>
         <Route path="/" component={Landing} />
         <Route path="/scheduled" component={Scheduled} />
-        <Route path="/completed" component={() => <div class="text-2xl">Completed</div>} />
+        <Route path="/completed" component={Completed} />
         <Route path="/settings" component={Settings} />
         <Route path="/run" component={Run} />
     </Router>
