@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Component, createResource, For } from "solid-js";
 import { IconExternalLink } from '@tabler/icons-solidjs';
+import { listen } from "@tauri-apps/api/event";
 
 
 type CompletedJobData = {
@@ -13,9 +14,13 @@ type CompletedJobData = {
 
 const Completed: Component<{}> = () => {
 
-    const [init] = createResource(async (): Promise<CompletedJobData[]> => {
+    const [init, {refetch}] = createResource(async (): Promise<CompletedJobData[]> => {
         const result: CompletedJobData[] = await invoke('get_all_completed', {});
         return result.reverse();
+    });
+
+    listen<string>('notebook_run_complete', (_event: any) => {
+        refetch();
     });
 
     const convertToDateString = (timestamp: number): string => {
@@ -43,8 +48,8 @@ const Completed: Component<{}> = () => {
                         {(item, _) => (
                             <tr class="text-center border p-3 text-md">
                                 <td class="py-1">{item.nb_path}</td>
-                                <td class="py-1">{item.output_path}
-                                    <button onClick={() => { openFileExplorer(item.output_path)}} class="mr-2">
+                                <td class="py-1">
+                                    <button onClick={() => { openFileExplorer(item.output_path) }} class="mr-2">
                                         <IconExternalLink />
                                     </button>
                                 </td>

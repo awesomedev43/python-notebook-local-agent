@@ -1,9 +1,15 @@
+import { listen } from "@tauri-apps/api/event";
 import "./App.css";
 import Header from "./Header.tsx"
 import Navbar from "./Navbar.tsx";
+import { createToastComponent, ToastType } from "./Toast.tsx";
 
 function App(props: any) {
 
+  let [showSuccessToast, successToastComponent] = createToastComponent(ToastType.Success);
+  listen<string>('notebook_run_complete', (event) => {
+    showSuccessToast(`Notebook execution is complete for ID: ${event.payload}`);
+  });
 
   return (
     <main>
@@ -23,6 +29,7 @@ function App(props: any) {
           </div>
         </div>
       </div>
+      {successToastComponent}
     </main>
   );
 }

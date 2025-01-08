@@ -2,20 +2,13 @@ import { Component, createSignal, Show } from "solid-js";
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { createToastComponent, ToastType } from "./Toast";
-import { listen } from '@tauri-apps/api/event';
 import cron from "cron-validate";
 
 const Run: Component<{}> = () => {
     const [nbPath, setNbPath] = createSignal<string>("");
     const [scheduled, setScheduled] = createSignal<boolean>(false);
-    let [showSuccessToast, successToastComponent] = createToastComponent(ToastType.Success);
     let [showNoteToast, noteToastComponent] = createToastComponent(ToastType.Note);
     let [showFailureToast, failureToastComponent] = createToastComponent(ToastType.Error);
-
-
-    listen<string>('notebook_run_complete', (event) => {
-        showSuccessToast(`Notebook execution is complete for ID: ${event.payload}`);
-    });
 
     const openNbPathDialog = async (event: any) => {
         event.preventDefault();
@@ -111,7 +104,6 @@ const Run: Component<{}> = () => {
                 </button>
             </form>
 
-            {successToastComponent}
             {noteToastComponent}
             {failureToastComponent}
 
