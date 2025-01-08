@@ -216,6 +216,12 @@ pub fn run() {
     let (job_cancel_sender, mut job_cancel_receiver) = channel::<job_scheduler::Uuid>();
 
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            let _ = app
+                .get_window("pynb-worker")
+                .expect("no main window")
+                .set_focus();
+        }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
