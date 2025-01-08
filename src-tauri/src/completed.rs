@@ -8,6 +8,7 @@ pub struct CompletedJobData {
     pub id: String,
     pub job_id: Option<String>,
     pub output_path: String,
+    pub nb_path: String,
     pub completed: i64,
 }
 
@@ -31,6 +32,7 @@ impl CompletedDB {
                 id           TEXT NOT NULL,
                 job_id       TEXT,
                 outputPath   TEXT NOT NULL,
+                nb_path      TEXT NOT NULL,
                 completed    TIMESTAMP
             )",
             (), // empty list of parameters.
@@ -44,8 +46,8 @@ impl CompletedDB {
         println!("Storing completed Job: {:?}", &data);
         self.connection
             .execute(
-                "INSERT INTO completedJob (id, job_id, outputPath, completed) VALUES (?1, ?2, ?3, ?4)",
-                (&data.id, &data.job_id, &data.output_path, &data.completed),
+                "INSERT INTO completedJob (id, job_id, outputPath, nb_path, completed) VALUES (?1, ?2, ?3, ?4, ?5)",
+                (&data.id, &data.job_id, &data.output_path, &data.nb_path, &data.completed),
             )
             .unwrap();
     }
@@ -53,7 +55,7 @@ impl CompletedDB {
     pub fn fetch_all(&self) -> Vec<CompletedJobData> {
         let mut stmt = self
             .connection
-            .prepare("SELECT id, job_id, outputPath, completed FROM completedJob")
+            .prepare("SELECT id, job_id, outputPath, nb_path, completed FROM completedJob")
             .unwrap();
         let iter = stmt
             .query_map([], |row| {
@@ -61,7 +63,8 @@ impl CompletedDB {
                     id: row.get(0).unwrap(),
                     job_id: row.get(1).unwrap(),
                     output_path: row.get(2).unwrap(),
-                    completed: row.get(3).unwrap(),
+                    nb_path: row.get(3).unwrap(),
+                    completed: row.get(4).unwrap(),
                 })
             })
             .unwrap();

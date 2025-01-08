@@ -56,6 +56,7 @@ pub fn execute_notebook(
             id: id.to_string(),
             job_id: None,
             output_path: execution_directory,
+            nb_path: notebook_path,
             completed: Utc::now().timestamp(),
         });
 

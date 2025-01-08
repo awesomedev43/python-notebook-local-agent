@@ -1,10 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Component, createResource, For, onMount } from "solid-js";
+import { Component, createResource, For } from "solid-js";
 
 type CompletedJobData = {
     id: string,
     job_id: string,
     output_path: string,
+    nb_path: string,
     completed: number,
 }
 
@@ -15,8 +16,8 @@ const Completed: Component<{}> = () => {
         return result.reverse();
     });
 
-    const convertToDateString = (timestamp: number): string =>{
-        let d = new Date(timestamp*1000);
+    const convertToDateString = (timestamp: number): string => {
+        let d = new Date(timestamp * 1000);
         return d.toLocaleString()
     };
 
@@ -26,13 +27,15 @@ const Completed: Component<{}> = () => {
                 <thead>
                     <tr class="bg-gray-200 text-black text-xl">
                         <th class="py-1">Notebook</th>
+                        <th class="py-1">Output Path</th>
                         <th class="py-1">Completed</th>
                     </tr>
                 </thead>
-                <tbody> 
+                <tbody>
                     <For each={init()}>
                         {(item, _) => (
                             <tr class="text-center border p-3 text-md">
+                                <td class="py-1">{item.nb_path}</td>
                                 <td class="py-1">{item.output_path}</td>
                                 <td class="py-1">{convertToDateString(item.completed)}</td>
                             </tr>
