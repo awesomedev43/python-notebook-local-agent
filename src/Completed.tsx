@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Component, createResource, For } from "solid-js";
+import { IconExternalLink } from '@tabler/icons-solidjs';
+
 
 type CompletedJobData = {
     id: string,
@@ -21,6 +23,11 @@ const Completed: Component<{}> = () => {
         return d.toLocaleString()
     };
 
+    const openFileExplorer = async (path: string) => {
+        console.log(path);
+        invoke('show_output_directory', { "dir": path }).then(() => { })
+    };
+
     return (
         <div class="flex flex-col mr-4">
             <table class="table-auto w-full pl-4 mb-4">
@@ -36,7 +43,11 @@ const Completed: Component<{}> = () => {
                         {(item, _) => (
                             <tr class="text-center border p-3 text-md">
                                 <td class="py-1">{item.nb_path}</td>
-                                <td class="py-1">{item.output_path}</td>
+                                <td class="py-1">{item.output_path}
+                                    <button onClick={() => { openFileExplorer(item.output_path)}} class="mr-2">
+                                        <IconExternalLink />
+                                    </button>
+                                </td>
                                 <td class="py-1">{convertToDateString(item.completed)}</td>
                             </tr>
                         )}

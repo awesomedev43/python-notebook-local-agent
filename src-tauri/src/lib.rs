@@ -1,5 +1,6 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
+use std::path;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{sync::Mutex, time::Duration};
 
@@ -7,6 +8,7 @@ use completed::{CompletedDB, CompletedJobData};
 use job_scheduler::{Job, JobScheduler};
 use scheduled::{ScheduledDB, ScheduledData};
 use serde::{Deserialize, Serialize};
+use tauri::async_runtime::spawn_blocking;
 use tauri::{App, AppHandle, Manager, State};
 use uuid;
 
@@ -194,6 +196,18 @@ fn cancel_scheduled_job(
     Ok(())
 }
 
+#[tauri::command]
+async fn show_output_directory(_app: AppHandle, dir: String) -> Result<(), String> {
+    spawn_blocking(move || {
+        let p = path::Path::new(&dir).join("execution.log");
+        println!("show_output_path = {:?}", &p);
+        showfile::show_path_in_file_manager(p);
+    })
+    .await
+    .unwrap();
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
@@ -233,7 +247,8 @@ pub fn run() {
             schedule_notebook,
             get_all_scheduled,
             cancel_scheduled_job,
-            get_all_completed
+            get_all_completed,
+            show_output_directory,
         ])
         .build(tauri::generate_context!())
         .expect("failed to build tauri app instance");
