@@ -8,12 +8,14 @@ import Settings from "./Settings";
 import Run from "./Run";
 import Scheduled from "./Scheduled";
 import Completed from "./Completed";
+import Report from "./Report";
 
 render(() => {
     return <Router root={App}>
         <Route path="/" component={Landing} />
         <Route path="/scheduled" component={Scheduled} />
         <Route path="/completed" component={Completed} />
+        <Route path="/completed/:id" component={Report} />
         <Route path="/settings" component={Settings} />
         <Route path="/run" component={Run} />
     </Router>

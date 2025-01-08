@@ -28,6 +28,7 @@ job_scheduler = "1.2.1"
 rusqlite = { version = "0.32.0", features = ["bundled"] }
 chrono = "0.4.39"
 showfile = "0.1.1"
+tauri-plugin-fs = "2"
 
 [dependencies.uuid]
 version = "1.11.0"

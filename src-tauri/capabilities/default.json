@@ -9,6 +9,11 @@
     "core:default",
     "opener:default",
     "store:default",
-    "dialog:default"
+    "dialog:default",
+    "fs:default",
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "$APPLOCALDATA" }, { "path": "$APPLOCALDATA/**" }]
+    }
   ]
 }

@@ -16,6 +16,7 @@
     "@tabler/icons-solidjs": "^3.26.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.2.0",
+    "@tauri-apps/plugin-fs": "^2.2.0",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-store": "^2.2.0",
     "cron-validate": "^1.4.5",
