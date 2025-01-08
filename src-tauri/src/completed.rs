@@ -43,7 +43,6 @@ impl CompletedDB {
     }
 
     pub fn store(&self, data: &CompletedJobData) {
-        println!("Storing completed Job: {:?}", &data);
         self.connection
             .execute(
                 "INSERT INTO completedJob (id, job_id, outputPath, nb_path, completed) VALUES (?1, ?2, ?3, ?4, ?5)",

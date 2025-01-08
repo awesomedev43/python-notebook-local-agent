@@ -32,15 +32,12 @@ pub fn execute_notebook(
     let id_str = id.to_string();
 
     tauri::async_runtime::spawn(async move {
-        println!("{:?}", &execution_directory);
         fs::create_dir_all(&execution_directory).expect("Unable to create directory");
 
         let stdoutfilepath = execution_directory.join("output.log");
-        println!("stdoutfilepath {:?}", &stdoutfilepath);
         let stdoutfile = File::create(stdoutfilepath).expect("failed to open log");
 
         let stderrfilepath = execution_directory.join("execution.log");
-        println!("stderrfilepath {:?}", &stderrfilepath);
         let stderrfile = File::create(stderrfilepath).expect("failed to open log");
 
         let outputfile = execution_directory.join(filename);

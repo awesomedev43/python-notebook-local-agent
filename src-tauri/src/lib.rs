@@ -158,14 +158,12 @@ fn schedule_notebook(
 
 #[tauri::command]
 fn get_all_scheduled(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<ScheduledData> {
-    println!("get_all_scheduled");
     let state = state.lock().unwrap();
     state.scheduled_db.fetch_all()
 }
 
 #[tauri::command]
 fn get_all_completed(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<CompletedJobData> {
-    println!("get_all_completed");
     let state = state.lock().unwrap();
     let res = state.completed_db.fetch_all();
     return res;
