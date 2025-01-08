@@ -3,7 +3,7 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{sync::Mutex, time::Duration};
 
-use completed::CompletedDB;
+use completed::{CompletedDB, CompletedJobData};
 use job_scheduler::{Job, JobScheduler};
 use scheduled::{ScheduledDB, ScheduledData};
 use serde::{Deserialize, Serialize};
@@ -57,8 +57,7 @@ fn run_notebook(
         (state.executable_path.clone(), state.data_directory.clone())
     };
 
-    let uuid =
-        runner::execute_notebook(app, executable_path, data_directory, run_args.nb_path);
+    let uuid = runner::execute_notebook(app, executable_path, data_directory, run_args.nb_path);
     return format!("{:?}", uuid);
 }
 
@@ -162,6 +161,14 @@ fn get_all_scheduled(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<
     state.scheduled_db.fetch_all()
 }
 
+#[tauri::command]
+fn get_all_completed(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<CompletedJobData> {
+    println!("get_all_completed");
+    let state = state.lock().unwrap();
+    let res = state.completed_db.fetch_all();
+    return res;
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct CancelScheduledRunArguments {
     id: String,
@@ -225,7 +232,8 @@ pub fn run() {
             configure_app,
             schedule_notebook,
             get_all_scheduled,
-            cancel_scheduled_job
+            cancel_scheduled_job,
+            get_all_completed
         ])
         .build(tauri::generate_context!())
         .expect("failed to build tauri app instance");

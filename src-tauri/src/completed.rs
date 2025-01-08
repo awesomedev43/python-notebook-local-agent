@@ -41,11 +41,31 @@ impl CompletedDB {
     }
 
     pub fn store(&self, data: &CompletedJobData) {
+        println!("Storing completed Job: {:?}", &data);
         self.connection
             .execute(
                 "INSERT INTO completedJob (id, job_id, outputPath, completed) VALUES (?1, ?2, ?3, ?4)",
                 (&data.id, &data.job_id, &data.output_path, &data.completed),
             )
             .unwrap();
+    }
+
+    pub fn fetch_all(&self) -> Vec<CompletedJobData> {
+        let mut stmt = self
+            .connection
+            .prepare("SELECT id, job_id, outputPath, completed FROM completedJob")
+            .unwrap();
+        let iter = stmt
+            .query_map([], |row| {
+                Ok(CompletedJobData {
+                    id: row.get(0).unwrap(),
+                    job_id: row.get(1).unwrap(),
+                    output_path: row.get(2).unwrap(),
+                    completed: row.get(3).unwrap(),
+                })
+            })
+            .unwrap();
+        let res = iter.map(|x| x.unwrap()).collect();
+        res
     }
 }

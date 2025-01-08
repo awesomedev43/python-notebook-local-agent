@@ -55,7 +55,7 @@ pub fn execute_notebook(
         state.lock().unwrap().completed_db.store(&CompletedJobData {
             id: id.to_string(),
             job_id: None,
-            output_path: data_directory,
+            output_path: execution_directory,
             completed: Utc::now().timestamp(),
         });
 
