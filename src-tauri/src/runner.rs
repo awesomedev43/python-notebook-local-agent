@@ -1,6 +1,6 @@
 use chrono::Utc;
 use std::fs::{self, File};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
@@ -25,7 +25,6 @@ pub fn execute_notebook(
     let id = Uuid::new_v4();
     let path = Path::new(&notebook_path);
     let filename: String = String::from(path.file_name().unwrap().to_str().unwrap());
-    // let execution_directory = format!("{}/{}-{}", &data_directory, filename, id);
     let execution_directory =
         Path::new(&data_directory).join(format!("{}-{}", &filename, id.to_string()));
 
@@ -40,16 +39,16 @@ pub fn execute_notebook(
         let stderrfilepath = execution_directory.join("execution.log");
         let stderrfile = File::create(stderrfilepath).expect("failed to open log");
 
-        let outputfile = execution_directory.join(filename);
+        let outputfile = execution_directory.join(&filename);
 
-        let mut child = Command::new(executable_path)
+        let mut child = Command::new(&executable_path)
             .args([
                 "-m",
                 "papermill",
                 &notebook_path,
                 &outputfile.to_str().unwrap(),
             ])
-            .current_dir(data_directory.clone())
+            .current_dir(execution_directory.clone())
             .stderr(stderrfile)
             .stdout(stdoutfile)
             .spawn()
@@ -66,8 +65,40 @@ pub fn execute_notebook(
             completed: Utc::now().timestamp(),
         });
 
+        generate_html_report(&app, &executable_path, &filename, &id, &execution_directory);
+
         app.emit("notebook_run_complete", &id_str).unwrap();
     });
 
     return id;
+}
+
+pub fn generate_html_report(
+    app: &AppHandle,
+    executable_path: &str,
+    filename: &str,
+    id: &Uuid,
+    execution_directory: &PathBuf,
+) {
+    let local_data_dir = app.path().app_local_data_dir().unwrap();
+    let output_dir = local_data_dir.as_path();
+    let output_file = format!("{}.html", id).to_string();
+
+    let mut child = Command::new(executable_path)
+        .args([
+            "-m",
+            "nbconvert",
+            "--to",
+            "html",
+            &filename,
+            "--output-dir",
+            output_dir.to_str().unwrap(),
+            "--output",
+            &output_file,
+        ])
+        .current_dir(execution_directory.clone())
+        .spawn()
+        .expect("Failed to spawn executable");
+
+    child.wait().expect("Failed to execute command");
 }
