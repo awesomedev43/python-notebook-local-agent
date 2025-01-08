@@ -9,7 +9,9 @@ use job_scheduler::{Job, JobScheduler};
 use scheduled::{ScheduledDB, ScheduledData};
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime::spawn_blocking;
-use tauri::{App, AppHandle, Manager, State};
+use tauri::menu::{Menu, MenuItem};
+use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
+use tauri::{App, AppHandle, Manager, State, WindowEvent};
 use uuid;
 
 mod completed;
@@ -237,6 +239,53 @@ pub fn run() {
                 job_cancel_sender,
                 completed_db,
             }));
+
+            let show_i = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
+            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+
+            let menu = Menu::with_items(app, &[&show_i, &quit_i])?;
+
+            let _ = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                .menu_on_left_click(false)
+                .tooltip("Python Notebook Local Agent")
+                .on_tray_icon_event(|icon, event| match event {
+                    TrayIconEvent::DoubleClick {
+                        id: _,
+                        position: _,
+                        rect: _,
+                        button,
+                    } => {
+                        if button == MouseButton::Left {
+                            let curr_window = icon.app_handle().get_window("pynb-worker").unwrap();
+                            curr_window.show().expect("Fail to show");
+                            if curr_window
+                                .is_minimized()
+                                .expect("Failed to get is_minimized")
+                            {
+                                curr_window.unminimize().expect("Failed to unminimize")
+                            }
+                        }
+                    }
+                    _ => {}
+                })
+                .on_menu_event(|myapp, event| match event.id.as_ref() {
+                    "quit" => {
+                        myapp.exit(0);
+                    }
+                    "show" => {
+                        let window = myapp.get_window("pynb-worker").unwrap();
+                        window.show().expect("Fail to show");
+                        if !(window.is_minimized().expect("Failed to get is_minimized")) {
+                            window.unminimize().expect("Failed to unminimize")
+                        }
+                    }
+                    _ => {}
+                })
+                .build(app)
+                .unwrap();
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -248,6 +297,13 @@ pub fn run() {
             get_all_completed,
             show_output_directory,
         ])
+        .on_window_event(|window, event| match event {
+            WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                window.hide().expect("Failed to hide window");
+            }
+            _ => {}
+        })
         .build(tauri::generate_context!())
         .expect("failed to build tauri app instance");
 
