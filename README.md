@@ -27,6 +27,10 @@ The application requires the following configuration before you are able to run 
 
 ## Screenshots
 
+### Landing Page
+
+![landing](./screenshots/landing.png)
+
 ### One-Off Run
 
 ![one off](./screenshots/one_off.png)
