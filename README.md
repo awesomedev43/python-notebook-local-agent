@@ -16,7 +16,7 @@ A [Tauri](https://tauri.app) based desktop application which allows a user to ru
 ## Setup
 
 The application requires the following configuration before you are able to run a notebook
-****
+
 - **Python executable**
   - A data science python environment like *Anaconda* or *Miniconda* will work best since it has Jupyter and all the software installed
   - Have `papermill`, and `nbconvert` installed
