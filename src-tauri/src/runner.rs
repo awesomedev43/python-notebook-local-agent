@@ -5,9 +5,12 @@ use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
 use uuid::Uuid;
+use std::os::windows::process::CommandExt;
 
 use crate::completed::CompletedJobData;
 use crate::AppState;
+
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 /**
  * This function will do the following
@@ -51,6 +54,7 @@ pub fn execute_notebook(
             .current_dir(execution_directory.clone())
             .stderr(stderrfile)
             .stdout(stdoutfile)
+            .creation_flags(CREATE_NO_WINDOW)
             .spawn()
             .expect("Failed to spawn executable");
 
@@ -97,6 +101,7 @@ pub fn generate_html_report(
             &output_file,
         ])
         .current_dir(execution_directory.clone())
+        .creation_flags(CREATE_NO_WINDOW)
         .spawn()
         .expect("Failed to spawn executable");
 
