@@ -57,6 +57,8 @@ The application requires the following configuration before you are able to run 
 ## Known Limitation and Issues
 
 - Only tested on Windows Platform
+- No ability to clean up of old job data
+- No database migration logic
 
 ## License
 
