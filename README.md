@@ -49,10 +49,14 @@ The application requires the following configuration before you are able to run 
 ## Feature Wishlist
 
 - Custom labels for both run types
-- Ability to delete completed runs
+- Ability to delete old completed runs
 - Start a new window to display report with nicer CSS
 - Allow YAML based execution parameters for notebook 
 - Allow setting environment variable for notebook
+
+## Known Limitation and Issues
+
+- Only tested on Windows Platform
 
 ## License
 
