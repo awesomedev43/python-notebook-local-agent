@@ -30,7 +30,6 @@ const Completed: Component<{}> = () => {
     };
 
     const openFileExplorer = async (path: string) => {
-        console.log(path);
         invoke('show_output_directory', { "dir": path }).then(() => { })
     };
 
