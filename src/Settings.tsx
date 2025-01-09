@@ -53,6 +53,9 @@ const Settings: Component<{}> = () => {
                 <form class="bg-white rounded pb-4 mb-2">
 
                     <h1 class="text-xl mb-4 font-bold">Notebook Run Configuration</h1>
+
+                    <p class="text-md mb-4">Please use either <code>Anaconda</code> or <code>Miniconda</code> environment as it contains most of the required Jupyter software to run notebooks. In addition to Jupyter packages, please ensure that <code>papermill</code>, <code>nbconvert</code> and any additional packages required to run your own notebook.</p>
+
                     <div class="mb-1">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
                             Python Executable
