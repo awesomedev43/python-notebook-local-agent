@@ -16,19 +16,18 @@ A [Tauri](https://tauri.app) based desktop application which allows a user to ru
 
 ## Setup
 
-The application requires the following configuration before you are able to run a notebook
+Follow the below steps to get started:
 
-- **Python executable**
-  - A data science python environment like *Anaconda* or *Miniconda* will work best since it has Jupyter and all the software installed
-  - Have `papermill`, and `nbconvert` installed
-
-    ```bash
-    python -m pip install papermill nbconvert
-    ```
-  - Additional python packages that are needed to run your notebook 
-
-- **Output directory**
-  - Directory used for storing executed notebook and output logs
+<ol>
+    <li>Install a Jupyter python environment. Anaconda or Miniconda is recommended</li>
+    <li>Install <code>papermill</code> and <code>nbconvert</code> package through <code>pip install</code></li>
+    <li>Install any additional packages that might be used by your own notebook</li>
+    <li>Launch the `pynb-worker` application</li>
+    <li>Configure the <b>Python Executable</b></li>
+    <li>Set the <b>Data Directory</b></li>
+    <li>Click <b>Save</b></li>
+    <li>Click on <b>Run</b> tab to begin executing your notebook </li>
+</ol>
 
 ## Screenshots
 
