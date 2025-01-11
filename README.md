@@ -8,7 +8,7 @@
 A [Tauri](https://tauri.app) based desktop application which allows a user to run Python notebook on their local machine in the background with user's already available python setup.
 
 ## Features:
-- Choose either **One-off** or **Schedule** mode
+- Choose either **One-off** or **Scheduled** mode
   - **One-Off**: Run a notebook in the background job
   - **Scheduled**: Run a notebook in the background job using a schedule specified by cron string
 - View and cancel **Scheduled** notebook jobs
@@ -63,7 +63,7 @@ The application requires the following configuration before you are able to run 
 
 - Only tested on Windows Platform
 - No ability to clean up of old job data
-- No database migration logic
+- All scheduled jobs become inactive on exit
 
 ## License
 
