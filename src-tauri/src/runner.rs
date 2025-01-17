@@ -1,11 +1,11 @@
 use chrono::Utc;
 use std::fs::{self, File};
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
 use uuid::Uuid;
-use std::os::windows::process::CommandExt;
 
 use crate::completed::CompletedJobData;
 use crate::AppState;
@@ -55,6 +55,11 @@ pub fn execute_notebook(
             .stderr(stderrfile)
             .stdout(stdoutfile)
             .creation_flags(CREATE_NO_WINDOW)
+            .env(
+                "NBPYTHONRUNNER_EXECDIRECTORY",
+                &execution_directory.to_str().unwrap(),
+            )
+            .env("NBPYTHONRUNNER_DATADIR", &data_directory)
             .spawn()
             .expect("Failed to spawn executable");
 
