@@ -26,18 +26,19 @@ impl ScheduledDB {
     }
 
     pub fn initialize(&self) {
-        match self.connection.execute(
-            "CREATE TABLE IF NOT EXISTS scheduledJob (
+        if self
+            .connection
+            .execute(
+                "CREATE TABLE IF NOT EXISTS scheduledJob (
                 id           TEXT NOT NULL,
                 jobId        TEXT,
                 nbPath       TEXT NOT NULL,
                 cronSchedule TEXT NOT NULL
             )",
-            (), // empty list of parameters.
-        ) {
-            Ok(_) => {}
-            Err(_) => {}
-        }
+                (), // empty list of parameters.
+            )
+            .is_ok()
+        {}
     }
 
     pub fn store(&self, data: &ScheduledData) {
@@ -70,7 +71,7 @@ impl ScheduledDB {
                 })
             })
             .unwrap();
-        let res = iter.map(|x| x.unwrap()).collect();
-        res
+
+        iter.map(|x| x.unwrap()).collect()
     }
 }

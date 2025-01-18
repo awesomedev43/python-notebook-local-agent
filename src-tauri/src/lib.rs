@@ -12,7 +12,6 @@ use tauri::async_runtime::spawn_blocking;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
 use tauri::{App, AppHandle, Manager, State, WindowEvent};
-use uuid;
 
 mod completed;
 mod runner;
@@ -62,7 +61,7 @@ fn run_notebook(
     };
 
     let uuid = runner::execute_notebook(app, executable_path, data_directory, run_args.nb_path);
-    return format!("{:?}", uuid);
+    format!("{:?}", uuid)
 }
 
 #[derive(Debug, Clone)]
@@ -73,10 +72,10 @@ pub struct NotebookJob {
     pub data_directory: String,
 }
 
-fn scheduler_loop<'r>(
+fn scheduler_loop(
     job_receiver: &mut Receiver<NotebookJob>,
     exit_receiver: &mut Receiver<bool>,
-    sched: &mut JobScheduler<'r>,
+    sched: &mut JobScheduler,
     job_id_sender: &Sender<job_scheduler::Uuid>,
     job_cancel_receiver: &mut Receiver<job_scheduler::Uuid>,
     app_handle: AppHandle,
@@ -167,8 +166,7 @@ fn get_all_scheduled(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<
 #[tauri::command]
 fn get_all_completed(_app: AppHandle, state: State<'_, Mutex<AppState>>) -> Vec<CompletedJobData> {
     let state = state.lock().unwrap();
-    let res = state.completed_db.fetch_all();
-    return res;
+    state.completed_db.fetch_all()
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -240,8 +238,8 @@ pub fn run() {
             app.manage(Mutex::new(AppState {
                 executable_path: String::from(""),
                 data_directory: String::from(""),
-                job_sender: job_sender,
-                job_id_receiver: job_id_receiver,
+                job_sender,
+                job_id_receiver,
                 scheduled_db,
                 job_cancel_sender,
                 completed_db,
@@ -257,13 +255,14 @@ pub fn run() {
                 .menu(&menu)
                 .menu_on_left_click(false)
                 .tooltip("Python Notebook Local Agent")
-                .on_tray_icon_event(|icon, event| match event {
-                    TrayIconEvent::DoubleClick {
+                .on_tray_icon_event(|icon, event| {
+                    if let TrayIconEvent::DoubleClick {
                         id: _,
                         position: _,
                         rect: _,
                         button,
-                    } => {
+                    } = event
+                    {
                         if button == MouseButton::Left {
                             let curr_window = icon.app_handle().get_window("pynb-worker").unwrap();
                             curr_window.show().expect("Fail to show");
@@ -275,7 +274,6 @@ pub fn run() {
                             }
                         }
                     }
-                    _ => {}
                 })
                 .on_menu_event(|myapp, event| match event.id.as_ref() {
                     "quit" => {
@@ -304,12 +302,11 @@ pub fn run() {
             get_all_completed,
             show_output_directory,
         ])
-        .on_window_event(|window, event| match event {
-            WindowEvent::CloseRequested { api, .. } => {
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
                 window.hide().expect("Failed to hide window");
             }
-            _ => {}
         })
         .build(tauri::generate_context!())
         .expect("failed to build tauri app instance");

@@ -1,7 +1,7 @@
 use chrono::Utc;
 use std::fs::{self, File};
 use std::os::windows::process::CommandExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager, State};
@@ -14,7 +14,7 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 /**
  * This function will do the following
- * - Generate a UUID
+ * - Generate a UUIbD
  * - Create a new directory for executing the notebok
  * - Execute the notebook
  * - Save the output to file
@@ -28,8 +28,7 @@ pub fn execute_notebook(
     let id = Uuid::new_v4();
     let path = Path::new(&notebook_path);
     let filename: String = String::from(path.file_name().unwrap().to_str().unwrap());
-    let execution_directory =
-        Path::new(&data_directory).join(format!("{}-{}", &filename, id.to_string()));
+    let execution_directory = Path::new(&data_directory).join(id.to_string());
 
     let id_str = id.to_string();
 
@@ -49,7 +48,7 @@ pub fn execute_notebook(
                 "-m",
                 "papermill",
                 &notebook_path,
-                &outputfile.to_str().unwrap(),
+                outputfile.to_str().unwrap(),
             ])
             .current_dir(execution_directory.clone())
             .stderr(stderrfile)
@@ -57,7 +56,7 @@ pub fn execute_notebook(
             .creation_flags(CREATE_NO_WINDOW)
             .env(
                 "NBPYTHONRUNNER_EXECDIRECTORY",
-                &execution_directory.to_str().unwrap(),
+                execution_directory.to_str().unwrap(),
             )
             .env("NBPYTHONRUNNER_DATADIR", &data_directory)
             .spawn()
@@ -79,7 +78,7 @@ pub fn execute_notebook(
         app.emit("notebook_run_complete", &id_str).unwrap();
     });
 
-    return id;
+    id
 }
 
 pub fn generate_html_report(
@@ -87,7 +86,7 @@ pub fn generate_html_report(
     executable_path: &str,
     filename: &str,
     id: &Uuid,
-    execution_directory: &PathBuf,
+    execution_directory: &Path,
 ) {
     let local_data_dir = app.path().app_local_data_dir().unwrap();
     let output_dir = local_data_dir.as_path();
@@ -99,13 +98,13 @@ pub fn generate_html_report(
             "nbconvert",
             "--to",
             "html",
-            &filename,
+            filename,
             "--output-dir",
             output_dir.to_str().unwrap(),
             "--output",
             &output_file,
         ])
-        .current_dir(execution_directory.clone())
+        .current_dir(execution_directory)
         .creation_flags(CREATE_NO_WINDOW)
         .spawn()
         .expect("Failed to spawn executable");

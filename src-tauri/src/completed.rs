@@ -67,7 +67,6 @@ impl CompletedDB {
                 })
             })
             .unwrap();
-        let res = iter.map(|x| x.unwrap()).collect();
-        res
+        iter.map(|x| x.unwrap()).collect()
     }
 }
