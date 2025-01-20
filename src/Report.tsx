@@ -20,7 +20,7 @@ const Report: Component<{}> = () => {
 
             <Switch>
                 <Match when={init()}>
-                    <div innerHTML={init()} class="mr-2">{ }</div>
+                    <iframe srcdoc={init()} class="mr-2 w-full h-full pb-30 overflow-hidden">{ }</iframe>
                 </Match>
             </Switch>
         </>
