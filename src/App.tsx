@@ -12,14 +12,14 @@ function App(props: any) {
   });
 
   return (
-    <main>
-      <div class="flex flex-col">
-        <div class="flex-none">
+    <main class="h-screen">
+      <div class="flex flex-col h-full">
+        <div class="grow-0">
           <Header />
         </div>
         <div class="grow">
-          <div class="flex flex-row">
-            <div class="flex-none w-24 h-screen bg-gray-200 border-r-[1px] border-gray-300 border-solid">
+          <div class="flex flex-row h-full">
+            <div class="w-24 bg-gray-200 border-r-[1px] border-gray-300 border-solid">
               <Navbar />
             </div>
             <div class="grow pl-3 pt-2 bg-white">

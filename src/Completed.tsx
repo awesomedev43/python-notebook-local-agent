@@ -58,7 +58,10 @@ const Completed: Component<{}> = () => {
                     <For each={init()}>
                         {(item, _) => (
                             <tr class="text-center border p-3 text-md">
-                                <td class="py-1"><button onClick={() => { removeCompletedEntry(item.id) }} class="border-solid border-2 border-black rounded shadow-sm shadow-gray-400 hover:bg-red-500 hover:text-white" ><IconX /></button></td>
+                                <td class="py-1"><button onClick={() => { removeCompletedEntry(item.id) }} class="border-solid border-2 border-black rounded shadow-sm shadow-gray-400 hover:bg-red-500 hover:text-white" >
+                                    <IconX size={17} />
+                                </button>
+                                </td>
                                 <td class="py-1">{item.nb_path}</td>
                                 <td class="py-1">
                                     <button onClick={() => { openFileExplorer(item.output_path) }} class="mr-2">
