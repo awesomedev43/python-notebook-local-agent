@@ -1,6 +1,6 @@
-use std::path::Path;
+use std::{fs, path::Path};
 
-use rusqlite::Connection;
+use rusqlite::{named_params, Connection};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -68,5 +68,31 @@ impl CompletedDB {
             })
             .unwrap();
         iter.map(|x| x.unwrap()).collect()
+    }
+
+    pub fn remove(&self, id: &str) {
+        {
+            let mut stmt = self
+                .connection
+                .prepare("SELECT outputPath FROM completedJob WHERE id = :id")
+                .expect("Failed to prepare statement");
+            let mut rows = stmt.query(named_params! {":id": &id}).unwrap();
+            while let Some(row) = rows.next().unwrap() {
+                let output_location: String = row.get(0).unwrap();
+                let output_path = Path::new(&output_location);
+                if output_path.is_dir() {
+                    fs::remove_dir_all(output_path).expect("Failed to remove output directory");
+                }
+            }
+        }
+
+        {
+            let mut stmt = self
+                .connection
+                .prepare("DELETE FROM completedJob where id = (?1)")
+                .expect("Failed to create delete statement");
+
+            stmt.execute([&id]).expect("Failed to delete entry");
+        }
     }
 }

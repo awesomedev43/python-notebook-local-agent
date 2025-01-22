@@ -1,7 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
-use std::path;
 use std::sync::mpsc::{channel, Receiver, Sender};
+use std::{fs, path};
 use std::{sync::Mutex, time::Duration};
 
 use completed::{CompletedDB, CompletedJobData};
@@ -206,6 +206,25 @@ async fn show_output_directory(_app: AppHandle, dir: String) -> Result<(), Strin
     Ok(())
 }
 
+#[tauri::command]
+async fn remove_completed_entry(
+    app: AppHandle,
+    state: State<'_, Mutex<AppState>>,
+    id: String,
+) -> Result<(), String> {
+    let local_data_dir = app.path().app_local_data_dir().unwrap();
+    let report_path = local_data_dir.join(&id);
+
+    if report_path.is_file() {
+        fs::remove_file(report_path).expect("Failed to delete report file");
+    }
+
+    let state = state.lock().unwrap();
+    state.completed_db.remove(&id);
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let (job_sender, mut job_receiver) = channel::<NotebookJob>();
@@ -301,6 +320,7 @@ pub fn run() {
             cancel_scheduled_job,
             get_all_completed,
             show_output_directory,
+            remove_completed_entry,
         ])
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
