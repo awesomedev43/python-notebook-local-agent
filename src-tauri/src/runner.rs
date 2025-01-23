@@ -65,6 +65,9 @@ pub fn execute_notebook(
         child.wait().expect("Failed to execute command");
 
         let state: State<'_, Mutex<AppState>> = app.state();
+
+        generate_html_report(&app, &executable_path, &filename, &id, &execution_directory);
+
         state.lock().unwrap().completed_db.store(&CompletedJobData {
             id: id.to_string(),
             job_id: None,
@@ -72,8 +75,6 @@ pub fn execute_notebook(
             nb_path: notebook_path,
             completed: Utc::now().timestamp(),
         });
-
-        generate_html_report(&app, &executable_path, &filename, &id, &execution_directory);
 
         app.emit("notebook_run_complete", &id_str).unwrap();
     });

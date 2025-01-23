@@ -213,7 +213,7 @@ async fn remove_completed_entry(
     id: String,
 ) -> Result<(), String> {
     let local_data_dir = app.path().app_local_data_dir().unwrap();
-    let report_path = local_data_dir.join(&id);
+    let report_path = local_data_dir.join(format!("{}.html", &id));
 
     if report_path.is_file() {
         fs::remove_file(report_path).expect("Failed to delete report file");
