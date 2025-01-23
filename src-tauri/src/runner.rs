@@ -43,7 +43,8 @@ pub fn execute_notebook(
 
         let outputfile = execution_directory.join(&filename);
 
-        let mut child = Command::new(&executable_path)
+        let mut command = Command::new(&executable_path);
+        command
             .args([
                 "-m",
                 "papermill",
@@ -53,14 +54,16 @@ pub fn execute_notebook(
             .current_dir(execution_directory.clone())
             .stderr(stderrfile)
             .stdout(stdoutfile)
-            .creation_flags(CREATE_NO_WINDOW)
             .env(
                 "NBPYTHONRUNNER_EXECDIRECTORY",
                 execution_directory.to_str().unwrap(),
             )
-            .env("NBPYTHONRUNNER_DATADIR", &data_directory)
-            .spawn()
-            .expect("Failed to spawn executable");
+            .env("NBPYTHONRUNNER_DATADIR", &data_directory);
+
+        if cfg!(windows) {
+            command.creation_flags(CREATE_NO_WINDOW);
+        }
+        let mut child = command.spawn().expect("Failed to spawn executable");
 
         child.wait().expect("Failed to execute command");
 
@@ -93,7 +96,8 @@ pub fn generate_html_report(
     let output_dir = local_data_dir.as_path();
     let output_file = format!("{}.html", id).to_string();
 
-    let mut child = Command::new(executable_path)
+    let mut command = Command::new(executable_path);
+    command
         .args([
             "-m",
             "nbconvert",
@@ -105,10 +109,13 @@ pub fn generate_html_report(
             "--output",
             &output_file,
         ])
-        .current_dir(execution_directory)
-        .creation_flags(CREATE_NO_WINDOW)
-        .spawn()
-        .expect("Failed to spawn executable");
+        .current_dir(execution_directory);
+
+    if cfg!(windows) {
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    let mut child = command.spawn().expect("Failed to spawn executable");
 
     child.wait().expect("Failed to execute command");
 }
