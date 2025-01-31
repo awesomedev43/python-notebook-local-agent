@@ -53,16 +53,13 @@ Follow the below steps to get started:
 ## Feature Wishlist
 
 - Custom labels for both run types
-- Ability to delete old completed runs
-- Start a new window to display report with nicer CSS
-- Allow YAML based execution parameters for notebook 
-- Allow setting environment variable for notebook
+- Allow YAML based execution parameters for notebook
+- Allow setting environment variable for notebook directly through the UI
 
 ## Known Limitation and Issues
 
 - Only tested on Windows Platform
-- No ability to clean up of old job data
-- All scheduled jobs become inactive on exit
+- All scheduled jobs become inactive on exit and not restarted when application restart
 
 ## License
 
