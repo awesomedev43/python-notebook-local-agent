@@ -1,6 +1,6 @@
 # Python Notebook Local Agent
 
-<div style='{"display": "flex", "flex-direction":"row"}'>
+<div style='{"display": "flex", "flex-direction":"column", width: "100%", "row-gap":"10px"}'>
   <img src="https://tauri.app/_astro/logo_light.Br3nqH4L.svg" width=200 style="margin-bottom:10px">
   <img src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" width=200>
 </div>
