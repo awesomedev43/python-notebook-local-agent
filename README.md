@@ -1,8 +1,8 @@
 # Python Notebook Local Agent
 
-<div style="display:flex; flex-direction:row;gap:30px; margin-bottom:20px; width:100%">
-  <img src="https://tauri.app/_astro/logo_light.Br3nqH4L.svg" width=150 style="margin-bottom:10px">
-  <img src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" width=300>
+<div style="display:flex; flex-direction:row;gap:100px; margin-bottom:20px; width:100%;">
+  <img src="https://tauri.app/_astro/logo_light.Br3nqH4L.svg" height=50 style="margin-bottom:10px">
+  <img src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" height=50>
 </div>
 
 A [Tauri](https://tauri.app) based desktop application which allows a user to run Python notebook on their local machine in the background with user's already available python setup.
