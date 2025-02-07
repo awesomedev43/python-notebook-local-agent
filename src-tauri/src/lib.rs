@@ -272,7 +272,7 @@ pub fn run() {
             let _ = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
-                .menu_on_left_click(false)
+                .show_menu_on_left_click(false)
                 .tooltip("Python Notebook Local Agent")
                 .on_tray_icon_event(|icon, event| {
                     if let TrayIconEvent::DoubleClick {
