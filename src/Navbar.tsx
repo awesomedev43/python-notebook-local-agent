@@ -1,5 +1,5 @@
 import { Component, For } from "solid-js";
-import { IconProgressCheck, IconSettings, IconPlayerPlay, IconClock } from '@tabler/icons-solidjs';
+import { IconProgressCheck, IconSettings, IconPlayerPlay, IconClock, IconLogs } from '@tabler/icons-solidjs';
 import { A } from "@solidjs/router";
 
 type ButtonProps = {
@@ -15,6 +15,11 @@ const Navbar: Component<{}> = () => {
             name: "Run",
             icon: IconPlayerPlay,
             href: "/run"
+        },
+        {
+            name: "Logs",
+            icon: IconLogs,
+            href: "/logging"
         },
         {
             name: "Scheduled",
