@@ -43,7 +43,7 @@ const Completed: Component<{}> = () => {
     };
 
     return (
-        <div class="flex flex-col mr-4">
+        <div class="flex flex-col mr-4 h-full overflow-auto">
             <table class="table-auto w-full pl-4 mb-4">
                 <thead>
                     <tr class="bg-gray-200 text-black text-xl">
@@ -73,7 +73,7 @@ const Completed: Component<{}> = () => {
                                         <IconReport />
                                     </A>
                                 </td>
-                                <td class="py-1">{convertToDateString(item.completed)}</td>
+                                <td class="py-1 pr-2">{convertToDateString(item.completed)}</td>
                             </tr>
                         )}
                     </For>
