@@ -12,6 +12,7 @@ import Report from "./Report";
 import Logs from "./Logs";
 import { listen } from "@tauri-apps/api/event";
 import { createSignal } from "solid-js";
+import { LogStoreProvider } from "./LogStore";
 
 render(() => {
 
@@ -21,13 +22,17 @@ render(() => {
         setLogData((data) => data + event.payload + "\n")
     });
 
-    return <Router root={App}>
-        <Route path="/" component={Landing} />
-        <Route path="/scheduled" component={Scheduled} />
-        <Route path="/completed" component={Completed} />
-        <Route path="/completed/:id" component={Report} />
-        <Route path="/settings" component={Settings} />
-        <Route path="/run" component={Run} />
-        <Route path="/logging" component={() => { return (<Logs logData={logData()} />) }} />
-    </Router>
+    return (
+        <LogStoreProvider>
+            <Router root={App}>
+                <Route path="/" component={Landing} />
+                <Route path="/scheduled" component={Scheduled} />
+                <Route path="/completed" component={Completed} />
+                <Route path="/completed/:id" component={Report} />
+                <Route path="/settings" component={Settings} />
+                <Route path="/run" component={Run} />
+                <Route path="/logging" component={() => { return (<Logs logData={logData()} />) }} />
+            </Router>
+        </LogStoreProvider>
+    )
 }, document.getElementById("root") as HTMLElement);

@@ -1,8 +1,11 @@
 import { Component, For } from "solid-js";
+import { useLogContext } from "./LogStore";
 
 const Logs: Component<{ logData: string }> = (props) => {
+    const { state } = useLogContext();
     return (
         <div class="h-full mr-2">
+            <p>{`${JSON.stringify(state.records)}`}</p>
             <h1 class="text-2xl font-bold mb-2">Logging</h1>
             <For each={props.logData.split("Starting").slice(1).reverse()} fallback={<div>Loading...</div>}>
                 {(block: string) => {

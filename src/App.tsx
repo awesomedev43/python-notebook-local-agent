@@ -3,12 +3,24 @@ import "./App.css";
 import Header from "./Header.tsx"
 import Navbar from "./Navbar.tsx";
 import { createToastComponent, ToastType } from "./Toast.tsx";
+import { useLogContext } from "./LogStore.tsx";
 
 function App(props: any) {
 
     let [showSuccessToast, successToastComponent] = createToastComponent(ToastType.Success);
+    const { state, setState } = useLogContext();
     listen<string>('notebook_run_complete', (event) => {
         showSuccessToast(`Notebook execution is complete for ID: ${event.payload}`);
+    });
+
+    listen<string>('notebook_log', (event) => {
+        console.log(event.payload)
+        setState("records", state.records.length, {
+            uuid: "",
+            date: 0,
+            log: event.payload
+        });
+        console.log(state);
     });
 
     return (
