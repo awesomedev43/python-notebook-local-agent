@@ -8,27 +8,18 @@ import { LogRecord, useLogContext } from "./LogStore.tsx";
 function App(props: any) {
 
     let [showSuccessToast, successToastComponent] = createToastComponent(ToastType.Success);
-    const { state, setState } = useLogContext();
+    const { setState } = useLogContext();
     listen<string>('notebook_run_complete', (event) => {
         showSuccessToast(`Notebook execution is complete for ID: ${event.payload}`);
     });
 
     listen<LogRecord>('notebook_log2', (event) => {
-        setState("logmap", (m: any) => {
+        setState("logmap", (m: Map<string, Array<LogRecord>>) => {
             let uuid = event.payload.uuid ?? "";
-            let newState = {
-                ...m,
-            };
-            if (uuid in newState) {
-                newState[uuid] = [...newState[uuid], event.payload];
-            }
-            else {
-
-                newState[uuid] = [event.payload];
-            }
-            return newState;
+            let newMap = new Map(m);
+            newMap.set(uuid, [...(m.get(uuid) ?? []), event.payload]);
+            return newMap;
         })
-        console.log(JSON.stringify(state.logmap))
     });
 
 

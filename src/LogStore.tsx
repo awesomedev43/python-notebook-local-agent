@@ -14,13 +14,13 @@ export type LogRecord = {
 };
 
 export type LogStoreState = {
-    logmap: { [key: string]: Array<LogRecord> }
+    logmap: Map<string, Array<LogRecord>>
 }
 
 const LogStoreContext = createContext();
 
 export function LogStoreProvider(props: any) {
-    const [state, setState] = createStore<LogStoreState>({ logmap: {} });
+    const [state, setState] = createStore<LogStoreState>({ logmap: new Map() });
 
 
     return (
