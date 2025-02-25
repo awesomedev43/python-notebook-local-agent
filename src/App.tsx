@@ -3,7 +3,7 @@ import "./App.css";
 import Header from "./Header.tsx"
 import Navbar from "./Navbar.tsx";
 import { createToastComponent, ToastType } from "./Toast.tsx";
-import { useLogContext } from "./LogStore.tsx";
+import { LogRecord, useLogContext } from "./LogStore.tsx";
 
 function App(props: any) {
 
@@ -13,15 +13,24 @@ function App(props: any) {
         showSuccessToast(`Notebook execution is complete for ID: ${event.payload}`);
     });
 
-    listen<string>('notebook_log', (event) => {
-        console.log(event.payload)
-        setState("records", state.records.length, {
-            uuid: "",
-            date: 0,
-            log: event.payload
-        });
-        console.log(state);
+    listen<LogRecord>('notebook_log2', (event) => {
+        setState("logmap", (m: any) => {
+            let uuid = event.payload.uuid ?? "";
+            let newState = {
+                ...m,
+            };
+            if (uuid in newState) {
+                newState[uuid] = [...newState[uuid], event.payload];
+            }
+            else {
+
+                newState[uuid] = [event.payload];
+            }
+            return newState;
+        })
+        console.log(JSON.stringify(state.logmap))
     });
+
 
     return (
         <main class="hscreen overflow-auto">

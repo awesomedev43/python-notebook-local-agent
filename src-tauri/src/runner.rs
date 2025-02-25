@@ -1,4 +1,5 @@
 use chrono::Utc;
+use serde::Serialize;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader, Write};
 use std::os::windows::process::CommandExt;
@@ -12,6 +13,14 @@ use crate::completed::CompletedJobData;
 use crate::AppState;
 
 const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LogRecord<'a> {
+    uuid: &'a str,
+    date: usize,
+    log: &'a str,
+}
 
 /**
  * This function will do the following
@@ -64,11 +73,6 @@ pub fn execute_notebook(
         if cfg!(windows) {
             command.creation_flags(CREATE_NO_WINDOW);
         }
-        app.emit(
-            "notebook_log",
-            format!("Starting Notebook Execution: {:?}\n", &notebook_path),
-        )
-        .unwrap();
 
         let mut child = command.spawn().expect("Failed to spawn executable");
 
@@ -76,19 +80,19 @@ pub fn execute_notebook(
         let execution_lines = execution_reader.lines();
 
         for line in execution_lines {
-            println!("{:?}", &line);
-            app.emit("notebook_log", format!("{}\n", line.as_ref().unwrap()))
-                .unwrap();
             write!(stderr_file, "{}", line.as_ref().unwrap()).expect("Failed to write");
+            app.emit(
+                "notebook_log2",
+                LogRecord {
+                    uuid: id_str.as_str(),
+                    date: 10,
+                    log: line.as_ref().unwrap().as_str(),
+                },
+            )
+            .unwrap();
         }
 
         child.wait().expect("Failed to execute command");
-
-        app.emit(
-            "notebook_log",
-            format!("Finished Notebook Execution: {:?}\n", &notebook_path),
-        )
-        .expect("Failed to emit notebook log");
 
         generate_html_report(&app, &executable_path, &filename, &id, &execution_directory);
 

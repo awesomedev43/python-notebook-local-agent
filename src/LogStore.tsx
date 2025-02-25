@@ -8,19 +8,19 @@ import { createStore } from "solid-js/store";
 
 
 export type LogRecord = {
-    uuid: String | undefined,
+    uuid: string | undefined,
     date: number | undefined,
-    log: String
+    log: string
 };
 
 export type LogStoreState = {
-    records: Array<LogRecord>
+    logmap: { [key: string]: Array<LogRecord> }
 }
 
 const LogStoreContext = createContext();
 
 export function LogStoreProvider(props: any) {
-    const [state, setState] = createStore<LogStoreState>({ records: [] });
+    const [state, setState] = createStore<LogStoreState>({ logmap: {} });
 
 
     return (

@@ -10,17 +10,9 @@ import Scheduled from "./Scheduled";
 import Completed from "./Completed";
 import Report from "./Report";
 import Logs from "./Logs";
-import { listen } from "@tauri-apps/api/event";
-import { createSignal } from "solid-js";
 import { LogStoreProvider } from "./LogStore";
 
 render(() => {
-
-    const [logData, setLogData] = createSignal<string>("");
-    listen<string>('notebook_log', (event) => {
-        console.log(event.payload)
-        setLogData((data) => data + event.payload + "\n")
-    });
 
     return (
         <LogStoreProvider>
@@ -31,7 +23,7 @@ render(() => {
                 <Route path="/completed/:id" component={Report} />
                 <Route path="/settings" component={Settings} />
                 <Route path="/run" component={Run} />
-                <Route path="/logging" component={() => { return (<Logs logData={logData()} />) }} />
+                <Route path="/logging" component={Logs} />
             </Router>
         </LogStoreProvider>
     )
