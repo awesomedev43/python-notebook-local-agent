@@ -53,6 +53,16 @@ pub fn execute_notebook(
 
         let outputfile = execution_directory.join(&filename);
 
+        app.emit(
+            "notebook_log2",
+            LogRecord {
+                uuid: id_str.as_str(),
+                date: 10,
+                log: format!("Starting execution for {}", filename).as_str(),
+            },
+        )
+        .unwrap();
+
         let mut command = Command::new(&executable_path);
         command
             .args([
@@ -93,6 +103,16 @@ pub fn execute_notebook(
         }
 
         child.wait().expect("Failed to execute command");
+
+        app.emit(
+            "notebook_log2",
+            LogRecord {
+                uuid: id_str.as_str(),
+                date: 10,
+                log: "Finished executing Notebook",
+            },
+        )
+        .unwrap();
 
         generate_html_report(&app, &executable_path, &filename, &id, &execution_directory);
 
