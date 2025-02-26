@@ -1,6 +1,6 @@
 [package]
 name = "pynb-worker"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Tauri App"
 authors = ["Ahmed S"]
 edition = "2021"

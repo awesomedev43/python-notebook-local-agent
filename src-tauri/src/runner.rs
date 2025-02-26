@@ -22,6 +22,11 @@ struct LogRecord<'a> {
     log: &'a str,
 }
 
+fn notify_frontend(app: &AppHandle, uuid: &str, date: usize, log: &str) {
+    app.emit("notebook_log2", LogRecord { uuid, date, log })
+        .unwrap();
+}
+
 /**
  * This function will do the following
  * - Generate a UUID
@@ -53,15 +58,12 @@ pub fn execute_notebook(
 
         let outputfile = execution_directory.join(&filename);
 
-        app.emit(
-            "notebook_log2",
-            LogRecord {
-                uuid: id_str.as_str(),
-                date: 10,
-                log: format!("Starting execution for {}", filename).as_str(),
-            },
-        )
-        .unwrap();
+        notify_frontend(
+            &app,
+            id_str.as_str(),
+            10,
+            format!("Starting execution for {}", filename).as_str(),
+        );
 
         let mut command = Command::new(&executable_path);
         command
@@ -91,28 +93,12 @@ pub fn execute_notebook(
 
         for line in execution_lines {
             write!(stderr_file, "{}", line.as_ref().unwrap()).expect("Failed to write");
-            app.emit(
-                "notebook_log2",
-                LogRecord {
-                    uuid: id_str.as_str(),
-                    date: 10,
-                    log: line.as_ref().unwrap().as_str(),
-                },
-            )
-            .unwrap();
+            notify_frontend(&app, id_str.as_str(), 10, line.as_ref().unwrap().as_str());
         }
 
         child.wait().expect("Failed to execute command");
 
-        app.emit(
-            "notebook_log2",
-            LogRecord {
-                uuid: id_str.as_str(),
-                date: 10,
-                log: "Finished executing Notebook",
-            },
-        )
-        .unwrap();
+        notify_frontend(&app, id_str.as_str(), 10, "Finished executing Notebook");
 
         generate_html_report(&app, &executable_path, &filename, &id, &execution_directory);
 
@@ -143,6 +129,13 @@ pub fn generate_html_report(
     let output_dir = local_data_dir.as_path();
     let output_file = format!("{}.html", id).to_string();
 
+    notify_frontend(
+        app,
+        id.to_string().as_str(),
+        10,
+        format!("Started generating html report for  {}", filename).as_str(),
+    );
+
     let mut command = Command::new(executable_path);
     command
         .args([
@@ -155,6 +148,7 @@ pub fn generate_html_report(
             output_dir.to_str().unwrap(),
             "--output",
             &output_file,
+            "--no-input",
         ])
         .current_dir(execution_directory);
 
@@ -165,4 +159,11 @@ pub fn generate_html_report(
     let mut child = command.spawn().expect("Failed to spawn executable");
 
     child.wait().expect("Failed to execute command");
+
+    notify_frontend(
+        app,
+        id.to_string().as_str(),
+        10,
+        format!("Finished generating html report for  {}", filename).as_str(),
+    );
 }
