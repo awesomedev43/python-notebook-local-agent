@@ -1,14 +1,17 @@
-import { Component, createSignal, Show } from "solid-js";
-import { open } from '@tauri-apps/plugin-dialog';
+import { useNavigate } from "@solidjs/router";
 import { invoke } from '@tauri-apps/api/core';
-import { createToastComponent, ToastType } from "./Toast";
+import { open } from '@tauri-apps/plugin-dialog';
 import cron from "cron-validate";
+import { Component, createSignal, Show } from "solid-js";
+import { createToastComponent, ToastType } from "./Toast";
 
 const Run: Component<{}> = () => {
     const [nbPath, setNbPath] = createSignal<string>("");
     const [scheduled, setScheduled] = createSignal<boolean>(false);
     let [showNoteToast, noteToastComponent] = createToastComponent(ToastType.Note);
     let [showFailureToast, failureToastComponent] = createToastComponent(ToastType.Error);
+    const navigate = useNavigate();
+
 
     const openNbPathDialog = async (event: any) => {
         event.preventDefault();
@@ -54,6 +57,7 @@ const Run: Component<{}> = () => {
         else {
             invoke('run_notebook', { "runArgs": { "nb_path": event.target.nbPath.value } }).then((message: any) => {
                 showNoteToast(`Started execution for Notebook with ID: ${message}`);
+                navigate("/logging")
             });
         }
 
