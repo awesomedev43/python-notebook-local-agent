@@ -2,6 +2,7 @@ use chrono::Utc;
 use serde::Serialize;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader, Write};
+#[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -12,6 +13,7 @@ use uuid::Uuid;
 use crate::completed::CompletedJobData;
 use crate::AppState;
 
+#[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[derive(Clone, Serialize)]
@@ -82,6 +84,7 @@ pub fn execute_notebook(
             )
             .env("NBPYTHONRUNNER_DATADIR", &data_directory);
 
+        #[cfg(target_os = "windows")]
         if cfg!(windows) {
             command.creation_flags(CREATE_NO_WINDOW);
         }
@@ -151,7 +154,8 @@ pub fn generate_html_report(
             "--no-input",
         ])
         .current_dir(execution_directory);
-
+    
+    #[cfg(target_os = "windows")]
     if cfg!(windows) {
         command.creation_flags(CREATE_NO_WINDOW);
     }
